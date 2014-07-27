@@ -1,0 +1,48 @@
+<div class="container">
+<table id="server-table" class="table table-striped">  
+  <thead>  
+    <tr>  
+      <th class="url">Server</th>  
+      <th class="alive">Alive</th>
+      <th class="workers">Workers</th>
+      <th class="expected">Expected</th>
+      <th class="hashrate">Hash Rate</th>
+      <th class="height">Height</th>
+      <th class="ratio">Ratio</th>
+    </tr>  
+  </thead>  
+  <tbody>  
+    {{#servers}}
+    {{#full}}
+    <tr>  
+      <td data-title="url" style="color:{{color}};">{{url}}</td>
+      <td data-title="alive">{{alive}}</td>
+      <td data-title="workers">{{workers}}</td>
+      <td data-title="expected">{{expected}}</td>
+      <td data-title="hashrate">{{hashrate}}</td>
+      <td data-title="height">{{height}}
+      <td data-title="ratio">{{ratio}}</td>
+    </tr>
+    {{/full}}
+    {{^full}}
+    <tr>  
+      <td data-title="url" style="color:{{color}};">{{url}}</td>
+      <td data-title="alive">{{alive}}</td>
+      <td data-title="workers" style="color:red">{{workers}}</td>
+      <td data-title="expected" style="color:red">{{expected}}</td>
+      <td data-title="hashrate">{{hashrate}}</td>
+      <td data-title="height">{{height}}
+      <td data-title="ratio">{{ratio}}</td>
+    </tr>
+    {{/full}}
+    {{/servers}}
+  </tbody>  
+</table>  
+
+<h3>Dead Blade</h3>
+<table class="table table-striped">
+  {{#dead}}
+  <tr><td>{{url}}</td></tr>
+  {{/dead}}
+</table>
+</div>
