@@ -1,0 +1,28 @@
+{
+  "name": "erpao2",
+  "version": "2.0.0",
+  "description": "erpao2",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stealth-startup/erpao2.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/stealth-startup/erpao2/issues"
+  },
+  "dependencies": {
+      "async": "~0.2.9",
+      "cheerio" : "*",
+      "body-parser" : "*",
+      "express" : "3.15.1",
+      "request" : "*",
+      "underscore" : "*",
+      "hogan-express" : "*",
+      "mysql" : "*"
+  }
+}
