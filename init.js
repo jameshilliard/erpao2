@@ -15,11 +15,15 @@ function conf_to_controllers(conf) {
 
 var controller_urls = conf_to_controllers(conf);
 
-async.each(['http://192.168.0.253:8000/'],
+async.each(controller_urls,
     //controller_urls,
 	   function(url){
 	       get_controller(url,function(err,res) {
-		   console.log(res);
+		   if(err) {
+		       console.log(err);
+		   } else {
+		       console.log(res);
+		   }
 	       });
 	   },
 	   function(err){
