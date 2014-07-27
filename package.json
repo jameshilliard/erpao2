@@ -23,6 +23,8 @@
       "request" : "*",
       "underscore" : "*",
       "hogan-express" : "*",
-      "mysql" : "*"
+      "mysql" : "*",
+      "moment" : "*",
+      "winston" : "*"
   }
 }
