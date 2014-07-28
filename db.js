@@ -11,13 +11,15 @@ var pool = mysql.createPool({
   port: 3306
 });
 
+function now(){
+    return moment().format('YYYY-M-D HH:mm:ss');
+}
 
 function insert_failed(failed) {
   var insert_controller_sql = "INSERT INTO controller_stats SET ?";
-  var now = moment().format('YYYY-M-D HH:mm:ss');
   async.each(failed,function(ip,callback){
       pool.getConnection(function(err, conn) {
-      var controller_stat = { 'ip':ip,'online':0,'updated_at':now };
+      var controller_stat = { 'ip':ip,'online':0,'updated_at':now() };
       conn.query(insert_controller_sql,controller_stat,
 		 function(err,res){
 		   if(err){
