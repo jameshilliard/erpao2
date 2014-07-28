@@ -15,8 +15,8 @@ var pool = mysql.createPool({
 function insert_failed(failed) {
   var insert_controller_sql = "INSERT INTO controller_stats SET ?";
   var now = moment().format('YYYY-M-D HH:mm:ss');
-  pool.getConnection(function(err, conn) {
-    async.each(failed,function(ip,callback){
+  async.each(failed,function(ip,callback){
+      pool.getConnection(function(err, conn) {
       var controller_stat = { 'ip':ip,'online':0,'updated_at':now };
       conn.query(insert_controller_sql,controller_stat,
 		 function(err,res){
@@ -27,11 +27,11 @@ function insert_failed(failed) {
 		     logger.info("inserted controller "+ip);
 		   }
 		 });
+      conn.release();
       callback();
     },function(err){
       logger.info("finished inserting failed controllers");
     });
-    conn.release();
   });
 }
 
