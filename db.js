@@ -38,4 +38,6 @@ function insert_failed(failed) {
 function insert_controller(stats) {
 }
 
+//pool.end();
+
 exports.insert_failed = insert_failed;
