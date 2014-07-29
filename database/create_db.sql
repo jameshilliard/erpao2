@@ -1,4 +1,7 @@
 CREATE DATABASE `pool` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+use pool;
+
 CREATE TABLE `board_stats` (
   `id` int(11) NOT NULL,
   `board_id` int(11) DEFAULT NULL,
@@ -73,4 +76,13 @@ CREATE TABLE `controllers` (
   `ip` varchar(45) DEFAULT NULL,
   `barcode` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `jobs` (
+  `job_id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` datetime DEFAULT NULL,
+  `hashrate` float DEFAULT NULL,
+  `eff` float DEFAULT NULL,
+  `expected` float DEFAULT NULL,
+  PRIMARY KEY (`job_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

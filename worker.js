@@ -14,13 +14,7 @@ function conf_to_controllers(conf) {
   }));
 }
 
-function url_to_ip(url) {
-  return url.slice(7,-6);
-}
-
 var controller_urls = conf_to_controllers(conf);
-
-
 
 function update_failed_controllers(failed){
   logger.info("Start updating failed controllers...");
@@ -34,7 +28,9 @@ function update_live_controllers(stats){
 function worker() {
   var failed = [];
   var stats = [];
-  logger.info("Start.");
+  var job_id = +new Date();
+  db.new_job(job_id);
+  logger.info("Start Worker");
   async.each(controller_urls,
 	     function(url,callback){
 	       get_controller(url,function(err,res) {
@@ -48,9 +44,9 @@ function worker() {
 	     },
 	     function(err){
 	       logger.info("Done.");
-	       db.insert_failed(failed.map(url_to_ip));
-	       // console.log(JSON.stringify(stats,null,2));
+	       db.insert_failed(failed.map(db.url_to_ip));
+	       db.insert_stats(stats,job_id);
 	     });
 }
 
-worker();
+exports.worker = worker;

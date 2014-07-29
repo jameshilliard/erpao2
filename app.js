@@ -1,7 +1,9 @@
 var download = (require('./download.js')).download;
 var cheerio = require('cheerio');
 var express = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var worker = require('./worker').worker;
+var logger = require('./logger');
 
 var app = express();
 app.set('view engine','html');
@@ -18,13 +20,18 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.get('/',function(req,res){
-    res.render('index');
+  
+  res.render('index');
 });
 
 app.get('/manage',function(req,res){
-    res.render('manage');
+  res.render('manage');
 });
 
 
-var server = app.listen(3000);
-console.log("Listening on Port 3000");
+var server = app.listen(80);
+console.log("Listening on Port 80");
+
+logger.info("Started worker process");
+//worker();
+setInterval(worker,500000);
