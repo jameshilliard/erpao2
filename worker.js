@@ -16,15 +16,6 @@ function conf_to_controllers(conf) {
 
 var controller_urls = conf_to_controllers(conf);
 
-function update_failed_controllers(failed){
-  logger.info("Start updating failed controllers...");
-  
-}
-
-function update_live_controllers(stats){
-  
-}
-
 function worker() {
   var failed = [];
   var stats = [];
@@ -44,7 +35,7 @@ function worker() {
 	     },
 	     function(err){
 	       logger.info("Done.");
-	       db.insert_failed(failed.map(db.url_to_ip));
+	       db.insert_failed(failed.map(db.url_to_ip),job_id);
 	       db.insert_stats(stats,job_id);
 	     });
 }

@@ -25,6 +25,7 @@
       "hogan-express" : "*",
       "mysql" : "*",
       "moment" : "*",
-      "winston" : "*"
+      "winston" : "*",
+      "printf" : "*"
   }
 }

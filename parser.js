@@ -2,6 +2,7 @@ var cheerio=require('cheerio');
 var download = (require('./download.js')).download;
 var async = require('async');
 var u = require('underscore');
+var printf =require('sprintf');
 
 String.prototype.startsWith = function(prefix) {
   return this.indexOf(prefix) === 0;
@@ -13,7 +14,7 @@ String.prototype.fulltrim = function() {
 
 function str_to_seconds(str){
     var nums = str.split(':').map(function(x){return parseInt(x);});
-    return nums[0]*86400+nums[1]*3600+nums[2]*60+nums[3]
+    return nums[0]*86400+nums[1]*3600+nums[2]*60+nums[3];
 }
 
 function seconds_to_str(sec){
@@ -23,7 +24,7 @@ function seconds_to_str(sec){
     sec = sec%3600;
     var m = sec/60;
     sec = sec%60;
-    return util.format("%02d:%02h:%02m:%02s");
+    return printf("%02dd:%02dh:%02dm:%02ds",d,h,m,sec);
 }
 
 function parse_detail(str) {

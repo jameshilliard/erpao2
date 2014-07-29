@@ -11,6 +11,8 @@ var pool = mysql.createPool({
   port: 3306
 });
 
+
+
 function now(){
     return moment().format('YYYY-M-D HH:mm:ss');
 }
@@ -34,6 +36,29 @@ function execSQL(sql,callback){
   });
 }
 
+function get_last_job(callback) {
+   execSQL("SELECT job_id FROM jobs ORDER BY job_id  DESC LIMIT 1",function(err,res){
+     if(err) {
+       logger.error(err);
+       callback(err,null);
+     } else {
+       callback(null,res[0]);
+     }
+   });
+}
+
+function get_controllers_by_job(job_id,callback) {
+  var sql=mysql.format("SELECT * FROM controller_stats WHERE job_id =?",[job_id]);
+  execSQL(sql,function(err,res){
+    if(err) {
+      logger.error(err);
+      callback(err,null);
+    } else {
+       callback(null,res);
+    }
+  });
+}
+
 function new_job(job_id) {
   var sql = mysql.format("INSERT INTO jobs SET ?",{'job_id':job_id, 'date':now()});
   execSQL(sql,function(err,res){});
@@ -44,25 +69,24 @@ function update_job(job) {
   execSQL(sql,function(err,res){});
 }
 
-function insert_failed(failed) {
+function insert_failed(failed,job_id) {
   var insert_controller_sql = "INSERT INTO controller_stats SET ?";
   var timestamp = now();
   async.each(failed,function(ip,callback){
       pool.getConnection(function(err, conn) {
-      var controller_stat = { 'ip':ip,'online':0,'updated_at':timestamp };
+      var controller_stat = { 'ip':ip,'online':0, 'job_id':job_id,'updated_at':timestamp };
       conn.query(insert_controller_sql,controller_stat,
 		 function(err,res){
 		   if(err){
 		     logger.error(err);
-		     logger.error("insert controller failed: "+ip);
 		   } else {
-		     logger.info("inserted controller "+ip);
+		     logger.info("inserted offline controller "+ip);
 		   }
 		 });
       conn.release();
       callback();
     },function(err){
-      logger.info("finished inserting failed controllers");
+      logger.info("finished inserting offline controllers");
     });
   });
 }
@@ -138,3 +162,5 @@ exports.insert_stats = insert_stats;
 exports.now = now;
 exports.new_job = new_job;
 exports.url_to_ip = url_to_ip;
+exports.get_last_job = get_last_job;
+exports.get_controllers_by_job = get_controllers_by_job;
