@@ -105,6 +105,7 @@ function insert_stats(stats,job_id) {
     var record = { 'ip':ip,
 		   'online':1,
 		   'clock':controller.Clock,
+		   'boards':boards.length,
 		   'hashrate':controller.HashRate,
 		   'expected':controller.Expected,
 		   'eff':controller.Eff,

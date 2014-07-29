@@ -45,11 +45,16 @@ app.get('/',function(req,res){
 		 function(controller,callback) {
 		   controller.ip_value = ip_to_value(controller.ip);
 		   controller.uptime_str = seconds_to_str(controller.uptime);
+		   if(controller.online) {
+		     controller.online = controller.boards;
+		   } else {
+		     controller.online = -1;
+		   }
 		   callback();
 		 },
 		 function(err){
 		 });
-      res.render('index',{'controllers':controllers});
+      res.render('index',{'job':job,'controllers':controllers});
     });
   });
 });
@@ -63,5 +68,5 @@ var server = app.listen(80);
 console.log("Listening on Port 80");
 
 logger.info("Started worker process");
-worker();
+//worker();
 setInterval(worker,500000);

@@ -13,6 +13,18 @@
 
 <!-- <div id="hashrate" style="height: 500px; min-width: 500px"></div> -->
 
+<script>
+  function reset(btn){
+     var options = $(btn).parents().find('select');
+     var clock = options[0].value;
+     var who = options[1].value;
+     var ip_str = $(btn).parent().parent().find('td:eq(1)').text();
+     var chunks = ip_str.split(".");
+     var ip1 = chunks[2];
+     var ip2 = chunks[3];
+     alert("reboot "+ip1+" "+ip2+" "+clock+" "+who);
+  }
+</script>
 
 <div id="controllers" class="container">
   <table class="table table-bordered table-striped sortable">
@@ -20,7 +32,8 @@
       <tr>
         <th width="20"><input type="checkbox"></th>
         <th data-mainsort="true" data-defaultsort="asc">IP</th>
-        <th>在线</th>
+        <th>算力板</th>
+	<th>频率</th>
         <th>算力(GH/s)</th>
         <th>理论值(GH/s)</th>
         <th>效率(%)</th>
@@ -34,16 +47,37 @@
 	<td><input type="checkbox" class="selector"></input></td>
 	<td data-value="{{ip_value}}">{{ip}}</td>
 	<td>{{online}}</td>
+	<td>{{clock}}</td>
 	<td>{{hashrate}}</td>
 	<td>{{expected}}</td>
 	<td>{{eff}}</td>
 	<td data-value="{{uptime}}">{{uptime_str}}</td>
 	<td>
-	  <button class="btn btn-small btn-info disabled">详细</button>
-	  <button class="btn btn-small btn-primary" >编辑</button>
+	  <button class="btn btn-small btn-info">详细</button>
+	  <button class="btn btn-small btn-primary">编辑</button>
+	  <button onclick="reset(this)" class="btn btn-small btn-danger">重启</button>
+	  <select>
+	    <option value="250" selected="selected">250</option>
+	    <option value="270">270</option>
+	    <option value="300">300</option>
+	    <option value="320">320</option>
+	  </select>
+	  <select>
+	    <option value="0">stratum-lb-usa48.btcguild.com</option>
+	    <option value="1" selected="selected">us-stratum-vip.btcguild.com</option>
+	  </select>
 	</td>
       </tr>
       {{/controllers}}
     </tbody>
   </table>
 </div>
+
+<script>
+  $('.dummy').spinedit({
+    minimum: 200,
+    maximum: 320,
+    step: 10,
+    numberOfDecimals: 0
+});
+</script>
