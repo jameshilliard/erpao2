@@ -22,11 +22,31 @@
      var chunks = ip_str.split(".");
      var ip1 = chunks[2];
      var ip2 = chunks[3];
-     alert("reboot "+ip1+" "+ip2+" "+clock+" "+who);
+     $.get( "/reboot", { who: who, clock: clock, ip1: ip1, ip2: ip2},function(data){
+              if(data=="Done") alert("重启成功!");
+     });
+
   }
 </script>
 
+<a href="/scan" class="btn btn-primary btn-lg" role="button">立刻刷新</a>
 <div id="controllers" class="container">
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+	<th>当前算力(TH/s)</th>
+	<th>理论算力(TH/s)</th>
+	<th>效率(%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#job}}
+      <td>{{hashrate}}</td>
+      <td>{{expected}}</td>
+      <td>{{eff}}</td>
+      {{/job}}
+    </tbody>
+  </table>
   <table class="table table-bordered table-striped sortable">
     <thead>
       <tr>
@@ -45,7 +65,7 @@
       {{#controllers}}
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
-	<td data-value="{{ip_value}}">{{ip}}</td>
+	<td data-value="{{ip_value}}"><a href="http://{{ip}}:8000/">{{ip}}</a></td>
 	<td>{{online}}</td>
 	<td>{{clock}}</td>
 	<td>{{hashrate}}</td>

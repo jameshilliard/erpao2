@@ -37,7 +37,7 @@ function execSQL(sql,callback){
 }
 
 function get_last_job(callback) {
-   execSQL("SELECT job_id FROM jobs ORDER BY job_id  DESC LIMIT 1",function(err,res){
+   execSQL("SELECT * FROM jobs ORDER BY job_id  DESC LIMIT 1",function(err,res){
      if(err) {
        logger.error(err);
        callback(err,null);

@@ -8,6 +8,7 @@ var db = require('./db');
 var async = require('async');
 var u = require('underscore');
 var printf = require('printf');
+var reboot = require('./reboot').reboot;
 
 var app = express();
 app.set('view engine','html');
@@ -54,8 +55,31 @@ app.get('/',function(req,res){
 		 },
 		 function(err){
 		 });
-      res.render('index',{'job':job,'controllers':controllers});
+      job.hashrate = job.hashrate/1000;
+      job.expected = job.expected/1000;
+      res.render('index',{'job':[job],'controllers':controllers});
     });
+  });
+});
+
+app.get('/reboot',function(req,res){
+  var who = req.query.who;
+  var clock = req.query.clock;
+  var ip1 = req.query.ip1;
+  var ip2 = req.query.ip2;
+  var opts = printf("%d %d %d %d",who,clock,ip1,ip2);
+  reboot(opts,function(err,resp){
+    if(err) {
+      res.send("Failed");
+    } else {
+      res.send("Done");
+    }
+  });
+});
+
+app.get('/scan',function(req,res){
+  worker(lock,function(){
+    res.redirect("/");
   });
 });
 
@@ -64,9 +88,11 @@ app.get('/manage',function(req,res){
 });
 
 
+
 var server = app.listen(80);
 console.log("Listening on Port 80");
 
+var lock = false;
 logger.info("Started worker process");
-//worker();
-setInterval(worker,500000);
+worker(lock,function(){});
+setInterval(function(){worker(lock,function(){});},500000);
