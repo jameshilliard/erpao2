@@ -25,8 +25,43 @@
      $.get( "/reboot", { who: who, clock: clock, ip1: ip1, ip2: ip2},function(data){
               if(data=="Done") alert("重启成功!");
      });
-
   }
+
+  function flash(btn){
+     var options = $(btn).parents().find('select');
+     var ip = $(btn).parent().parent().find('td:eq(1)').text();
+     $.get("/flash", { ip: ip } , function(data) {
+        if(data=="Done") alert("Flash成功!");
+       });
+  }
+
+  function reclock(btn) {
+     var options = $(btn).parents().find('select');
+     var clock = options[0].value;
+     var ip = $(btn).parent().parent().find('td:eq(1)').text();
+     var cur = $(btn).parent().parent().find('td:eq(4)').text();
+     $.get("/reclock", { ip:ip, clock:clock, cur:cur },function(data){
+              $(btn).parent().parent().find('td:eq(4)').text(clock);
+              if(data=="Done") alert("设定成功!");
+     });
+  }
+
+  $(document).ready(function () {
+
+    (function ($) {
+
+        $('#filter').keyup(function () {
+            var rex = new RegExp($(this).val());
+            $('.searchable tr').hide();
+            $('.searchable tr').filter(function () {
+                return rex.test($(this).find('td:eq(2)').text());
+            }).show();
+
+        })
+
+    }(jQuery));
+
+});
 </script>
 
 <a href="/scan" class="btn btn-primary btn-lg" role="button">立刻刷新</a>
@@ -47,11 +82,15 @@
       {{/job}}
     </tbody>
   </table>
-  <table class="table table-bordered table-striped sortable">
+  <div class="input-group"> <span class="input-group-addon">Filter</span>
+    <input id="filter" type="text" class="form-control" placeholder="Type here...">
+  </div>
+  <table id="controllers" class="table table-bordered table-striped sortable">
     <thead>
       <tr>
         <th width="20"><input type="checkbox"></th>
         <th data-mainsort="true" data-defaultsort="asc">IP</th>
+	<th>分组</th>
         <th>算力板</th>
 	<th>频率</th>
         <th>算力(GH/s)</th>
@@ -61,11 +100,12 @@
 	<th></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="searchable">
       {{#controllers}}
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
 	<td data-value="{{ip_value}}"><a href="http://{{ip}}:8000/">{{ip}}</a></td>
+	<td>{{group}}</td>
 	<td>{{online}}</td>
 	<td>{{clock}}</td>
 	<td>{{hashrate}}</td>
@@ -73,8 +113,10 @@
 	<td>{{eff}}</td>
 	<td data-value="{{uptime}}">{{uptime_str}}</td>
 	<td>
-	  <button class="btn btn-small btn-info">详细</button>
-	  <button class="btn btn-small btn-primary">编辑</button>
+	  <!-- <button class="btn btn-small btn-info">详细</button> -->
+	  <!-- <button class="btn btn-small btn-primary">编辑</button> -->
+	  <button onclick="flash(this)" class="btn btn-small btn-danger">Flash</button>
+	  <button onclick="reclock(this)" class="btn btn-small btn-danger">频率</button>
 	  <button onclick="reset(this)" class="btn btn-small btn-danger">重启</button>
 	  <select>
 	    <option value="250" selected="selected">250</option>
@@ -82,7 +124,7 @@
 	    <option value="300">300</option>
 	    <option value="320">320</option>
 	  </select>
-	  <select>
+	  <select style="width:80px;">
 	    <option value="0">stratum-lb-usa48.btcguild.com</option>
 	    <option value="1" selected="selected">us-stratum-vip.btcguild.com</option>
 	  </select>
@@ -93,11 +135,4 @@
   </table>
 </div>
 
-<script>
-  $('.dummy').spinedit({
-    minimum: 200,
-    maximum: 320,
-    step: 10,
-    numberOfDecimals: 0
-});
-</script>
+

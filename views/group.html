@@ -1,0 +1,21 @@
+<script>
+function reloadFrame() { 
+        self.location.reload(); 
+}   
+</script>
+<style>
+iframe frame{
+        max-width: 100%;
+        max-height:100%;
+-webkit-transform:scale(0.5);
+-moz-transform-scale(0.5);
+}
+</style>
+
+
+<FRAMESET id="content" rows="33%,33%,34%" cols="25%,25%,25%,25%">
+{{#ips}}
+  <frame src="http://192.168.{{ip1}}.{{ip2}}:8000/" scrolling="yes" frameborder="0" onload="setTimeout('reloadFrame()',20000);">
+{{/ips}}
+</FRAMESET>
+

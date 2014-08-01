@@ -16,33 +16,29 @@ function conf_to_controllers(conf) {
 
 var controller_urls = conf_to_controllers(conf);
 
-function worker(lock,callback) {
-  if(!lock) {
-    lock = true;
-    var failed = [];
-    var stats = [];
-    var job_id = +new Date();
-    db.new_job(job_id);
-    logger.info("Start Worker");
-    async.each(controller_urls,
-	       function(url,callback){
-		 get_controller(url,function(err,res) {
-		   if(err) {
-		     failed.push(url);
-		   } else {
-		     stats.push(res);
-		   }
-		   callback();
-		 });
-	       },
-	       function(err){
-		 logger.info("Done.");
-		 db.insert_failed(failed.map(db.url_to_ip),job_id);
-		 db.insert_stats(stats,job_id);
-		 lock = false;
+function worker(callback) {
+  var failed = [];
+  var stats = [];
+  var job_id = +new Date();
+  db.new_job(job_id);
+  logger.info("Start scraping");
+  async.each(controller_urls,
+	     function(url,callback){
+	       get_controller(url,function(err,res) {
+		 if(err) {
+		   failed.push(url);
+		 } else {
+		   stats.push(res);
+		 }
 		 callback();
 	       });
-  }
+	     },
+	     function(err){
+	       logger.info("Scraping Done.");
+	       logger.info("MySQL start.");
+	       db.insert_failed(failed.map(db.url_to_ip),job_id);
+	       db.insert_stats(stats,job_id,callback);
+	     });
 }
 
 exports.worker = worker;

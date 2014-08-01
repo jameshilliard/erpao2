@@ -1,7 +1,7 @@
 var async = require('async');
 var moment = require('moment');
 var logger = require('./logger');
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
 var pool = mysql.createPool({
   host: 'localhost',
@@ -64,9 +64,12 @@ function new_job(job_id) {
   execSQL(sql,function(err,res){});
 }
 
-function update_job(job) {
+function update_job(job,cb) {
   var sql = mysql.format("UPDATE jobs SET ? WHERE job_id=?",[job,job.job_id]);
-  execSQL(sql,function(err,res){});
+  execSQL(sql,function(err,res){
+    logger.info("MySQL Done.");
+    cb();
+  });
 }
 
 function insert_failed(failed,job_id) {
@@ -80,7 +83,7 @@ function insert_failed(failed,job_id) {
 		   if(err){
 		     logger.error(err);
 		   } else {
-		     logger.info("inserted offline controller "+ip);
+//		     logger.info("inserted offline controller "+ip);
 		   }
 		 });
       conn.release();
@@ -91,7 +94,7 @@ function insert_failed(failed,job_id) {
   });
 }
 
-function insert_stats(stats,job_id) {
+function insert_stats(stats,job_id,cb) {
   var timestamp = now();
   var hashrate = 0;
   var expected = 0;
@@ -121,7 +124,7 @@ function insert_stats(stats,job_id) {
 		 };
     var sql = mysql.format(insert_controller,record);
     execSQL(sql,function(err,res){});
-    logger.info("Insert boards  for "+ip);
+//    logger.info("Insert boards  for "+ip);
     async.each(boards,function(board,callback){
       var insert_board = "INSERT INTO board_stats SET ?";
       var record = { 'board_id':board.id,
@@ -137,22 +140,22 @@ function insert_stats(stats,job_id) {
 		     'job_id':job_id
 		   };
       var sql = mysql.format(insert_board,record);
-      execSQL(sql,function(err,res){});
+     // execSQL(sql,function(err,res){});
       callback();
     },function(err){
-      logger.info("Insert boards for "+ip+" done.");
+//      logger.info("Insert boards for "+ip+" done.");
     });
     callback();
   },function(err){
-    console.log(hashrate);
-    console.log(expected);
+    logger.info("HashRate:"+hashrate);
+    logger.info("Expected:"+expected);
     var eff = Math.floor(hashrate*10000/expected)/100;
     var job = { 'job_id':job_id,
 		'hashrate':hashrate,
 		'expected':expected,
 		'eff': eff
 	      };
-    update_job(job);
+    update_job(job,cb);
   });
 }
 

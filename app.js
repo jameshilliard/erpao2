@@ -9,6 +9,7 @@ var async = require('async');
 var u = require('underscore');
 var printf = require('printf');
 var reboot = require('./reboot').reboot;
+var range = require('./range');
 
 var app = express();
 app.set('view engine','html');
@@ -40,10 +41,12 @@ function seconds_to_str(sec){
 }
 
 app.get('/',function(req,res){
+  var groups = range('A','O').toArray();
   db.get_last_job(function(err,job){
     db.get_controllers_by_job(job.job_id,function(err,controllers){
       async.each(controllers,
 		 function(controller,callback) {
+		   controller.group = groups[parseInt(controller.ip.split('.')[2])-1];
 		   controller.ip_value = ip_to_value(controller.ip);
 		   controller.uptime_str = seconds_to_str(controller.uptime);
 		   if(controller.online) {
@@ -77,22 +80,65 @@ app.get('/reboot',function(req,res){
   });
 });
 
+app.get('/flash',function(req,res){
+  var ip = req.query.ip;
+  var url = "http://"+ip+":8000/FlashMega/";
+  console.log(url);
+  download(url,function(data){
+    if(data) {
+      res.send("Done");
+    } else {
+      res.send("Failed");
+    }
+  });
+});
+
+
+app.get('/reclock',function(req,res){
+  var ip = req.query.ip;
+  var clock = req.query.clock;
+  var cur = req.query.cur;
+  var url,step;
+  if(cur == clock) return;
+  if(cur>clock){
+    url = "http://"+ip+":8000/Clk_Down/";
+    step = (cur-clock)/10;
+  } else {
+    url = "http://"+ip+":8000/Clk_Up/";
+    step = (clock-cur)/10;
+  }
+  async.times(step, function(n,next){
+    download(url, function(page) {
+      next(null,page);
+    });
+  }, function(err, pages) {
+    res.send("Done");
+  });
+});
+
 app.get('/scan',function(req,res){
-  worker(lock,function(){
+  worker(function(){
     res.redirect("/");
   });
 });
 
-app.get('/manage',function(req,res){
-  res.render('manage');
+app.get('/groups',function(req,res){
+  var groups = range('A','O').toArray().map(function(x){return {G:x};});
+  res.render('groups',{groups:groups});
 });
 
-
+app.get('/groups/:g/:s',function(req,res){
+  var g = req.params.g;
+  var ip1 = g.charCodeAt()-'A'.charCodeAt()+1;
+  var s = req.params.s;
+  var r = range(1+12*(s-1),12*s);
+  var ips = r.toArray().map(function(x){return {ip1:ip1,ip2:x};});
+  res.render('group',{ips:ips,layout:false});
+});
 
 var server = app.listen(80);
 console.log("Listening on Port 80");
 
-var lock = false;
 logger.info("Started worker process");
-worker(lock,function(){});
-setInterval(function(){worker(lock,function(){});},500000);
+//worker(function(){});
+setInterval(function(){worker(function(){});},500000);

@@ -7,7 +7,7 @@ function download(url,callback) {
 	} else {
 	    callback(null);
 	}
-    })
+    });
 }
 
 exports.download = download;
