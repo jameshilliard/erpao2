@@ -36,6 +36,26 @@ function execSQL(sql,callback){
   });
 }
 
+function save_reboot_controller(ip,boards,job_id){
+  var sql = mysql.format("INSERT into reboots SET?",{ 'ip':ip,'boards':boards,'job_id':job_id });
+  execSQL(sql,function(err,res){
+  });
+}
+
+function get_latest_reboots(callback){
+  var now = +new Date();
+  var limit = now-24*3600*1000;
+  var sql = mysql.format("SELECT * FROM reboots WHERE job_id>? ORDER BY job_id DESC",limit);
+  execSQL(sql,function(err,res){
+    if(err){
+      logger.error(err);
+      callback(err,null);
+    } else {
+      callback(null,res);
+    }
+  });
+}
+
 function get_last_job(callback) {
    execSQL("SELECT * FROM jobs ORDER BY job_id  DESC LIMIT 1",function(err,res){
      if(err) {
@@ -168,3 +188,5 @@ exports.new_job = new_job;
 exports.url_to_ip = url_to_ip;
 exports.get_last_job = get_last_job;
 exports.get_controllers_by_job = get_controllers_by_job;
+exports.save_reboot_controller = save_reboot_controller;
+exports.get_latest_reboots = get_latest_reboots;

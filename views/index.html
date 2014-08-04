@@ -72,6 +72,9 @@
 	<th>当前算力(TH/s)</th>
 	<th>理论算力(TH/s)</th>
 	<th>效率(%)</th>
+	<th>在线</th>
+	<th>离线</th>
+	<th>平均算力(TH/s)</th>
       </tr>
     </thead>
     <tbody>
@@ -79,6 +82,9 @@
       <td>{{hashrate}}</td>
       <td>{{expected}}</td>
       <td>{{eff}}</td>
+      <td>{{online}}</td>
+      <td>{{offline}}</td>
+      <td>{{avg}}</td>
       {{/job}}
     </tbody>
   </table>
@@ -104,7 +110,7 @@
       {{#controllers}}
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
-	<td data-value="{{ip_value}}"><a href="http://{{ip}}:8000/">{{ip}}</a></td>
+	<td data-value="{{ip_value}}"><a target="_blank" href="http://{{ip}}:8000/">{{ip}}</a></td>
 	<td>{{group}}</td>
 	<td>{{online}}</td>
 	<td>{{clock}}</td>

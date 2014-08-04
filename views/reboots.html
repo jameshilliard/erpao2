@@ -1,0 +1,18 @@
+<table class="table table-striped sortable">
+  <thead>
+    <tr>
+      <th>IP</th>
+      <th data-mainsort="true" data-defaultsort="dsc">重启时间</th>
+      <th>算力板</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#reboots}}
+    <tr>
+      <td data-value="{{ip_value}}"><a target="_blank" href="http://{{ip}}:8000/">{{ip}}</a></td>
+      <td data-value="{{job_id}}">{{reboot_time}}</td>
+      <td>{{boards}}</td>
+    </tr>
+    {{/reboots}}
+  </tbody>
+</table>

@@ -118,16 +118,20 @@ function get_all_boards(err,full_detail,callback) {
 }
 
 function get_core_test(str) {
-  var id = parseInt(str.slice(5,7));
-  str = str.slice(8);
-  var chunks = str.split('|');
-  var asics = chunks.slice(1,-1).join('');
-  var ver = chunks[9].slice(3);
-  return [id,{
-    'id' : id,
-    'asics' : asics,
-    'ver' : ver
-  }];
+  try{
+    var id = parseInt(str.slice(5,7));
+    str = str.slice(8);
+    var chunks = str.split('|');
+    var asics = chunks.slice(1,-1).join('');
+    var ver = chunks[9].slice(3);
+    return [id,{
+      'id' : id,
+      'asics' : asics,
+      'ver' : ver
+    }];
+  } catch(e) {
+    return [-1,{}];
+  }
 }
 
 function get_all_cores(err,boards,callback) {
@@ -136,7 +140,9 @@ function get_all_cores(err,boards,callback) {
 	boards.forEach(
 	    function(board) {
 		var res = get_core_test(board);
-		stats[res[0]]=res[1];
+	        if(res[0]!=-1) {
+		  stats[res[0]]=res[1];
+		}
 	    }
 	);
 	callback(null,stats);  

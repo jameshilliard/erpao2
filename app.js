@@ -10,6 +10,7 @@ var u = require('underscore');
 var printf = require('printf');
 var reboot = require('./reboot').reboot;
 var range = require('./range');
+var moment = require('moment');
 
 var app = express();
 app.set('view engine','html');
@@ -42,8 +43,13 @@ function seconds_to_str(sec){
 
 app.get('/',function(req,res){
   var groups = range('A','O').toArray();
+  var online;
+  var offline;
   db.get_last_job(function(err,job){
     db.get_controllers_by_job(job.job_id,function(err,controllers){
+      var count = u.countBy(controllers,function(x){return x.online;});
+      online = count['1'];
+      offline = count['0'];
       async.each(controllers,
 		 function(controller,callback) {
 		   controller.group = groups[parseInt(controller.ip.split('.')[2])-1];
@@ -60,6 +66,9 @@ app.get('/',function(req,res){
 		 });
       job.hashrate = job.hashrate/1000;
       job.expected = job.expected/1000;
+      job.online = online;
+      job.offline = offline;
+      job.avg = Math.floor(job.hashrate*1000/job.online)/1000;
       res.render('index',{'job':[job],'controllers':controllers});
     });
   });
@@ -116,6 +125,18 @@ app.get('/reclock',function(req,res){
   });
 });
 
+app.get('/reboots',function(req,res){
+  db.get_latest_reboots(function(err,reboots){
+    async.each(reboots,function(reboot,callback){
+      reboot.reboot_time = moment(reboot.job_id).format('YYYY-M-D HH:mm:ss');
+      reboot.ip_value = ip_to_value(reboot.ip);
+      callback();
+    },function(err){
+      res.render('reboots',{'reboots':reboots});
+    });
+  });
+});
+
 app.get('/scan',function(req,res){
   worker(function(){
     res.redirect("/");
@@ -140,5 +161,5 @@ var server = app.listen(80);
 console.log("Listening on Port 80");
 
 logger.info("Started worker process");
-//worker(function(){});
+worker(function(){});
 setInterval(function(){worker(function(){});},500000);
