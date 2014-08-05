@@ -92,25 +92,18 @@ function update_job(job,cb) {
   });
 }
 
-function insert_failed(failed,job_id) {
+function insert_failed(failed,job_id,cb) {
   var insert_controller_sql = "INSERT INTO controller_stats SET ?";
   var timestamp = now();
   async.each(failed,function(ip,callback){
-      pool.getConnection(function(err, conn) {
-      var controller_stat = { 'ip':ip,'online':0, 'job_id':job_id,'updated_at':timestamp };
-      conn.query(insert_controller_sql,controller_stat,
-		 function(err,res){
-		   if(err){
-		     logger.error(err);
-		   } else {
-//		     logger.info("inserted offline controller "+ip);
-		   }
-		 });
-      conn.release();
+    var controller_stat = { 'ip':ip,'online':0, 'job_id':job_id,'updated_at':timestamp };
+    var sql = mysql.format(insert_controller_sql,controller_stat);
+    execSQL(sql,function(err,res){
       callback();
-    },function(err){
-      logger.info("finished inserting offline controllers");
     });
+  },function(err){
+    logger.info("finished inserting offline controllers");
+    cb();
   });
 }
 

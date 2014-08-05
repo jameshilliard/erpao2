@@ -99,6 +99,16 @@
     }(jQuery));
   
     mark_red();
+
+    $('#selectAll').on('click', function () {
+       var state = $('#selectAll').is(':checked');
+       $('.searchable tr').filter(function () {
+                return $(this).is(':visible');
+       }).each(function(){$(this).find('td:eq(0) input:eq(0)').prop('checked',state);})
+    });
+
+
+
 });
 </script>
 
@@ -140,7 +150,7 @@
   <table id="controllers" class="table table-bordered table-striped sortable">
     <thead>
       <tr>
-        <th width="20" data-defaultsort="disabled"><input type="checkbox"></th>
+        <th width="20" data-defaultsort="disabled"><input id="selectAll" type="checkbox"></th>
         <th data-mainsort="true" data-defaultsort="asc">IP</th>
 	<th>分组</th>
         <th>算力板</th>
@@ -149,7 +159,22 @@
         <th>理论值(GH/s)</th>
         <th>效率(%)</th>
         <th>运行时间</th>
-	<th></th>
+	<th>
+	  <button onclick="group_flash()" class="btn btn-small btn-danger disabled">Flash</button>
+	  <button onclick="group_up()" class="btn btn-small btn-primary disabled">UP</button>
+	  <button onclick="group_down()" class="btn btn-small btn-primary disabled">DOWN</button>
+	  <button onclick="group_reset()" class="btn btn-small btn-warningd disabled">重启</button>
+	  <select>
+	    <option value="250" selected="selected">250</option>
+	    <option value="270">270</option>
+	    <option value="300">300</option>
+	    <option value="320">320</option>
+	  </select>
+	  <select style="width:80px;">
+	    <option value="0">stratum-lb-usa48.btcguild.com</option>
+	    <option value="1" selected="selected">us-stratum-vip.btcguild.com</option>
+	  </select>
+	</th>
       </tr>
     </thead>
     <tbody class="searchable">

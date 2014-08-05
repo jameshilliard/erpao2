@@ -25,21 +25,21 @@ var controller_urls = conf_to_controllers(conf);
 var last_reboot = new moment();
 var force_reboot = true;
  
-function worker(callback) {
+function worker(w_callback) {
   var failed = [];
   var stats = [];
   var job_id = +new Date();
   db.new_job(job_id);
   logger.info("Start scraping");
   async.eachLimit(controller_urls,120,
-	     function(url,callback){
+	     function(url,cb){
 	       get_controller(url,function(err,res) {
 		 if(err) {
 		   failed.push(url);
 		 } else {
 		   stats.push(res);
 		 }
-		 callback();
+		 cb();
 	       });
 	     },
 	     function(err){
@@ -47,12 +47,10 @@ function worker(callback) {
 	       logger.info("MySQL start.");
 	       async.parallel([
 		 function(cb){
-		   db.insert_failed(failed.map(db.url_to_ip),job_id);
-		   cb();
+		   db.insert_failed(failed.map(db.url_to_ip),job_id,function(){cb();});
 		 },
 		 function(cb){
-		   db.insert_stats(stats,job_id,callback);
-		   cb();
+		   db.insert_stats(stats,job_id,function(){cb();});
 		 },
 		 function(cb){
 		   var now = new moment();
@@ -77,6 +75,7 @@ function worker(callback) {
 		   cb();
 		 }],function(err){
 		   logger.info("Worker Done.");
+		   w_callback();
 		 });
 	       });
 }
