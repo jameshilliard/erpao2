@@ -12,6 +12,9 @@
 <!-- <script type="text/javascript" src="js/highstock.js"></script> -->
 
 <!-- <div id="hashrate" style="height: 500px; min-width: 500px"></div> -->
+<style>
+.table-striped tbody tr td.highlight { background-color: #d2cece; }
+</style>
 
 <script>
   function reset(btn){
@@ -46,10 +49,45 @@
      });
   }
 
+  function show_group(btn) {
+     var rex;
+     if(btn) {
+       rex = new RegExp($(btn).text());
+     } else {
+       rex = new RegExp("");
+     } 
+     $('.searchable tr').hide();
+     $('.searchable tr').filter(function () {
+           return rex.test($(this).find('td:eq(2)').text());
+     }).show();
+     update_stats(btn);
+  }
+
+  function update_stats(btn){
+     var url;
+     if(btn) {
+       url = "/stats/"+$(btn).text();
+     } else {
+       url = "/stats";
+     } 
+     $.getJSON(url,function(data){
+       $('#stats').find('tbody tr td:eq(0)').text(data.hashrate);
+       $('#stats').find('tbody tr td:eq(1)').text(data.expected);
+       $('#stats').find('tbody tr td:eq(2)').text(data.eff);
+       $('#stats').find('tbody tr td:eq(3)').text(data.online);
+       $('#stats').find('tbody tr td:eq(4)').text(data.offline);
+       $('#stats').find('tbody tr td:eq(5)').text(data.avg);
+     });
+  }
+
+  function mark_red(){
+     $('.searchable tr').filter(function(){
+         return $(this).find('td:eq(3)').text() == '-1';
+     }).each(function(){$(this).find('td:eq(3)').addClass('highlight')});
+  }
+
   $(document).ready(function () {
-
     (function ($) {
-
         $('#filter').keyup(function () {
             var rex = new RegExp($(this).val());
             $('.searchable tr').hide();
@@ -58,15 +96,15 @@
             }).show();
 
         })
-
     }(jQuery));
-
+  
+    mark_red();
 });
 </script>
 
 <a href="/scan" class="btn btn-primary btn-lg" role="button">立刻刷新</a>
 <div id="controllers" class="container">
-  <table class="table table-bordered table-striped">
+  <table id="stats" class="table table-bordered table-striped">
     <thead>
       <tr>
 	<th>当前算力(TH/s)</th>
@@ -88,13 +126,21 @@
       {{/job}}
     </tbody>
   </table>
-  <div class="input-group"> <span class="input-group-addon">Filter</span>
-    <input id="filter" type="text" class="form-control" placeholder="Type here...">
-  </div>
+  <!-- <div class="input-group"> <span class="input-group-addon">Filter</span> -->
+  <!--   <input id="filter" type="text" class="form-control" placeholder="Type here..."> -->
+  <!-- </div> -->
+  <table class="table">
+    <tr>
+      <td><button class="btn btn-primary btn-small" onclick="show_group()">ALL</button></td>
+      {{#groups}}
+      <td><button class="btn btn-success btn-small" onclick="show_group(this)">{{group}}</button></td>
+      {{/groups}}
+    </tr>
+  </table>
   <table id="controllers" class="table table-bordered table-striped sortable">
     <thead>
       <tr>
-        <th width="20"><input type="checkbox"></th>
+        <th width="20" data-defaultsort="disabled"><input type="checkbox"></th>
         <th data-mainsort="true" data-defaultsort="asc">IP</th>
 	<th>分组</th>
         <th>算力板</th>
@@ -122,8 +168,9 @@
 	  <!-- <button class="btn btn-small btn-info">详细</button> -->
 	  <!-- <button class="btn btn-small btn-primary">编辑</button> -->
 	  <button onclick="flash(this)" class="btn btn-small btn-danger">Flash</button>
-	  <button onclick="reclock(this)" class="btn btn-small btn-danger">频率</button>
-	  <button onclick="reset(this)" class="btn btn-small btn-danger">重启</button>
+	  <button onclick="reclock(this)" class="btn btn-small btn-primary">UP</button>
+	  <button onclick="reclock(this)" class="btn btn-small btn-primary">DOWN</button>
+	  <button onclick="reset(this)" class="btn btn-small btn-warning">重启</button>
 	  <select>
 	    <option value="250" selected="selected">250</option>
 	    <option value="270">270</option>

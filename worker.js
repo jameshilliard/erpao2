@@ -61,18 +61,18 @@ function worker(callback) {
 		     last_reboot = now;
 		     logger.info("Rebooting lame controllers");
 		     async.each(stats,
-				function(stat,cb){
-				  var controller = stat[0];
-				  var boards = stat[1].length;
-				  var ip  = url_to_ip(controller.url);
-				  if(boards>0 && boards<16) {
-				    db.save_reboot_controller(ip,boards,job_id);
-				    reboot_ip(ip);
-				  }
-				  cb();
-				},function(err){
-				  logger.info("Rebooting lame controllers Done.");
-				});
+		   		function(stat,cb){
+		   		  var controller = stat[0];
+		   		  var boards = stat[1].length;
+		   		  var ip  = url_to_ip(controller.url);
+		   		  if(boards>0 && boards<16) {
+		   		    db.save_reboot_controller(ip,boards,job_id);
+		   		    reboot_ip(ip);
+		   		  }
+		   		  cb();
+		   		},function(err){
+		   		  logger.info("Rebooting lame controllers Done.");
+		   		});
 		   }
 		   cb();
 		 }],function(err){

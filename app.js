@@ -41,6 +41,9 @@ function seconds_to_str(sec){
     return printf("%02dd:%02dh:%02dm:%02ds",d,h,m,sec);
 }
 
+var cur_job;
+var cur_controllers;
+
 app.get('/',function(req,res){
   var groups = range('A','O').toArray();
   var online;
@@ -69,9 +72,44 @@ app.get('/',function(req,res){
       job.online = online;
       job.offline = offline;
       job.avg = Math.floor(job.hashrate*1000/job.online)/1000;
-      res.render('index',{'job':[job],'controllers':controllers});
+      cur_job = job;
+      cur_controllers = controllers;
+      res.render('index',{'job':[job],'controllers':controllers,'groups': groups.map(function(x){return {group:x};})});
     });
   });
+});
+
+app.get('/stats',function(req,res){
+  res.json(cur_job);
+});
+
+app.get('/stats/:group',function(req,res){
+  var group = req.params.group;
+  var groups = range('A','O').toArray();
+  var ip_sec = groups.indexOf(group)+1;
+  if(ip_sec==0) {
+    res.json(cur_job);
+  } else {
+    var group_controllers = u.filter(cur_controllers,function(controller){
+      var ip = controller.ip;
+      return (ip.split('.')[2]==ip_sec);
+    });
+    var group_job = u.foldl(group_controllers,function(res,controller){
+      res.hashrate+=controller.hashrate;
+      res.expected+=controller.expected;
+      if(controller.online>=0) {
+	res.online+=1;
+      } else {
+	res.offline+=1;
+      }
+      return res;
+    },{hashrate:0,expected:0,online:0,offline:0});
+    group_job.hashrate = Math.floor(group_job.hashrate)/1000;
+    group_job.expected = Math.floor(group_job.expected)/1000;
+    group_job.avg = Math.floor(group_job.hashrate*1000/group_job.online)/1000;
+    group_job.eff = Math.floor(group_job.hashrate*10000/group_job.expected)/100;
+    res.json(group_job);
+  }
 });
 
 app.get('/reboot',function(req,res){
@@ -161,5 +199,5 @@ var server = app.listen(80);
 console.log("Listening on Port 80");
 
 logger.info("Started worker process");
-worker(function(){});
+// worker(function(){});
 setInterval(function(){worker(function(){});},500000);
