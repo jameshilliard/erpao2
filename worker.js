@@ -54,7 +54,8 @@ function worker(w_callback) {
 		 },
 		 function(cb){
 		   var now = new moment();
-		   if(force_reboot || now.diff(last_reboot,'minutes')>=10) {
+		   if(false){
+		     // (force_reboot || now.diff(last_reboot,'minutes')>=10)
 		     force_reboot = false;
 		     last_reboot = now;
 		     logger.info("Rebooting lame controllers");

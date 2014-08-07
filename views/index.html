@@ -13,10 +13,35 @@
 
 <!-- <div id="hashrate" style="height: 500px; min-width: 500px"></div> -->
 <style>
-.table-striped tbody tr td.highlight { background-color: #d2cece; }
+.table-striped tbody tr td.highlight { background-color: #cc425d; }
 </style>
 
 <script>
+  function group_action(idx){
+     var checked = $('.searchable tr').filter(function () {
+         return $(this).find('td:eq(0) input:eq(0)').is(':checked')
+     });
+     checked.each(function(){
+         $(this).find('td:last button').get(idx).click();
+     });
+  }
+
+  function group_flash(){
+    group_action(0);
+  }
+
+  function group_up(){
+    group_action(1);
+  }
+
+  function group_down(){
+    group_action(2);
+  }
+
+  function group_reset(){
+    group_action(3);
+  }
+  
   function reset(btn){
      var options = $(btn).parents().find('select');
      var clock = options[0].value;
@@ -48,6 +73,24 @@
      $.get("/reclock", { ip:ip, clock:clock, cur:cur },function(data){
               $(btn).parent().parent().find('td:eq(4)').text(clock);
               if(data=="Done") alert("设定成功!");
+     });
+  }
+
+  function clockup(btn) {
+     var ip = $(btn).parent().parent().find('td:eq(1)').text();
+     $(btn).button('loading');
+     $.get("/clockup", {ip:ip} , function(new_clk){
+        $(btn).parent().parent().find('td:eq(4)').text(new_clk);
+        $(btn).button('reset');
+     });
+  }
+
+  function clockdown(btn) {
+     var ip = $(btn).parent().parent().find('td:eq(1)').text();
+     $(btn).button('loading');
+     $.get("/clockdown", {ip:ip} , function(new_clk){
+        $(btn).parent().parent().find('td:eq(4)').text(new_clk);
+        $(btn).button('reset');
      });
   }
 
@@ -114,7 +157,7 @@
 });
 </script>
 
-<a href="/scan" class="btn btn-primary btn-lg" role="button">立刻刷新</a>
+<a href="/scan" data-loading-text="刷新..." class="btn btn-primary btn-lg" role="button" onclick="$(this).button('loading')">立刻刷新</a>
 <div id="controllers" class="container">
   <table id="stats" class="table table-bordered table-striped">
     <thead>
@@ -162,20 +205,10 @@
         <th>效率(%)</th>
         <th>运行时间</th>
 	<th>
-	  <button onclick="group_flash()" class="btn btn-small btn-danger disabled">Flash</button>
-	  <button onclick="group_up()" class="btn btn-small btn-primary disabled">UP</button>
-	  <button onclick="group_down()" class="btn btn-small btn-primary disabled">DOWN</button>
-	  <button onclick="group_reset()" class="btn btn-small btn-warningd disabled">重启</button>
-	  <select>
-	    <option value="250" selected="selected">250</option>
-	    <option value="270">270</option>
-	    <option value="300">300</option>
-	    <option value="320">320</option>
-	  </select>
-	  <select style="width:80px;">
-	    <option value="0">stratum-lb-usa48.btcguild.com</option>
-	    <option value="1" selected="selected">us-stratum-vip.btcguild.com</option>
-	  </select>
+	  <button id="btn-g-flash" onclick="group_flash()" class="btn btn-small btn-danger">Flash</button>
+	  <button id="btn-g-up" onclick="group_up()" class="btn btn-small btn-primary">UP</button>
+	  <button id="btn-g-down" onclick="group_down()" class="btn btn-small btn-primary">DOWN</button>
+	  <button id="btn-g-reset" onclick="group_reset()" class="btn btn-small btn-warning">重启</button>
 	</th>
       </tr>
     </thead>
@@ -195,8 +228,8 @@
 	  <!-- <button class="btn btn-small btn-info">详细</button> -->
 	  <!-- <button class="btn btn-small btn-primary">编辑</button> -->
 	  <button onclick="flash(this)" data-loading-text="Flash..." class="btn btn-small btn-danger">Flash</button>
-	  <button onclick="reclock(this)" data-loading-text="UP..." class="btn btn-small btn-primary">UP</button>
-	  <button onclick="reclock(this)" data-loading-text="DOWN..." class="btn btn-small btn-primary">DOWN</button>
+	  <button onclick="clockup(this)" data-loading-text="UP..." class="btn btn-small btn-primary">UP</button>
+	  <button onclick="clockdown(this)" data-loading-text="DOWN..." class="btn btn-small btn-primary">DOWN</button>
 	  <button onclick="reset(this)" data-loading-text="重启..." class="btn btn-small btn-warning">重启</button>
 	  <select>
 	    <option value="250" selected="selected">250</option>

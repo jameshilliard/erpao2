@@ -148,7 +148,7 @@ app.get('/reclock',function(req,res){
   var url,step;
   if(cur == clock) return;
   if(cur>clock){
-    url = "http://"+ip+":8000/Clk_Down/";
+    url = "http://"+ip+":8000/Clk_Dn/";
     step = (cur-clock)/10;
   } else {
     url = "http://"+ip+":8000/Clk_Up/";
@@ -162,6 +162,34 @@ app.get('/reclock',function(req,res){
     res.send("Done");
   });
 });
+
+app.get('/clockup',function(req,res){
+  var ip = req.query.ip;
+  var url = "http://"+ip+":8000/Clk_Up/";
+  download(url,function(page){
+    try{
+      var new_clk = page.match(/Clock:([\d]+)MHz/)[1];
+      res.send(new_clk);
+    } catch(e) {
+      res.send('250');
+    }
+  });
+});
+
+
+app.get('/clockdown',function(req,res){
+  var ip = req.query.ip;
+  var url = "http://"+ip+":8000/Clk_Dn/";
+  download(url,function(page){
+    try{
+      var new_clk = page.match(/Clock:([\d]+)MHz/)[1];
+      res.send(new_clk);
+    } catch(e) {
+      res.send('250');
+    }
+  });
+});
+
 
 app.get('/reboots',function(req,res){
   db.get_latest_reboots(function(err,reboots){
@@ -193,6 +221,14 @@ app.get('/groups/:g/:s',function(req,res){
   var r = range(1+12*(s-1),12*s);
   var ips = r.toArray().map(function(x){return {ip1:ip1,ip2:x};});
   res.render('group',{ips:ips,layout:false});
+});
+
+app.get('/grab/:ip',function(req,res){
+  var ip = req.params.ip;
+  var url = "http://"+ip+":8000/";
+  download(url,function(page){
+    res.send(page);
+  });
 });
 
 var server = app.listen(80);
