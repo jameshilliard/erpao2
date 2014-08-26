@@ -54,8 +54,7 @@ function worker(w_callback) {
 		 },
 		 function(cb){
 		   var now = new moment();
-		   if(false){
-		     // (force_reboot || now.diff(last_reboot,'minutes')>=10)
+		   if (force_reboot || now.diff(last_reboot,'minutes')>=10){
 		     force_reboot = false;
 		     last_reboot = now;
 		     logger.info("Rebooting lame controllers");
@@ -64,7 +63,7 @@ function worker(w_callback) {
 		   		  var controller = stat[0];
 		   		  var boards = stat[1].length;
 		   		  var ip  = url_to_ip(controller.url);
-		   		  if(boards>0 && boards<16) {
+		   		  if(boards>0 && boards<12) {
 		   		    db.save_reboot_controller(ip,boards,job_id);
 		   		    reboot_ip(ip);
 		   		  }
