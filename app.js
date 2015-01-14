@@ -231,8 +231,8 @@ app.get('/grab/:ip',function(req,res){
   });
 });
 
-var server = app.listen(80);
-console.log("Listening on Port 80");
+var server = app.listen(8000);
+console.log("Listening on Port 8000");
 
 logger.info("Started worker process");
 // worker(function(){});

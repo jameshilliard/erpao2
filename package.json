@@ -23,9 +23,11 @@
       "request" : "*",
       "underscore" : "*",
       "hogan-express" : "*",
-      "mysql" : "*",
+      "pq" : "*",
+      "hogan.js" : "*",
       "moment" : "*",
       "winston" : "*",
-      "printf" : "*"
+      "printf" : "*",
+      "sprintf" : "*"
   }
 }
