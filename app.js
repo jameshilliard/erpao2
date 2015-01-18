@@ -1,16 +1,13 @@
-var download = (require('./download.js')).download;
-var cheerio = require('cheerio');
 var express = require('express');
 var bodyParser = require('body-parser');
-var worker = require('./worker').worker;
 var logger = require('./logger');
-var db = require('./db');
+var db = require('./ckdb_fs');
 var async = require('async');
 var u = require('underscore');
 var printf = require('printf');
-var reboot = require('./reboot').reboot;
 var range = require('./range');
 var moment = require('moment');
+var helpers = require('./helpers');
 
 var app = express();
 app.set('view engine','html');
@@ -32,208 +29,94 @@ function ip_to_value(ip) {
 
 
 function seconds_to_str(sec){
-    var d = sec/86400;
-    sec = sec%86400;
-    var h = sec/3600;
-    sec = sec%3600;
-    var m = sec/60;
-    sec = sec%60;
-    return printf("%02dd:%02dh:%02dm:%02ds",d,h,m,sec);
+  var d = sec/86400;
+  sec = sec%86400;
+  var h = sec/3600;
+  sec = sec%3600;
+  var m = sec/60;
+  sec = sec%60;
+  return printf("%02dd:%02dh:%02dm:%02ds",d,h,m,sec);
 }
 
-var cur_job;
-var cur_controllers;
+var poolstats;
+var workers;
+var workerstats;
+var groups;
+var groupstats;
+var last_update = new moment();
+
+function stats_loader() {
+  async.series([
+    function(cb){
+      cb(null,db.getPoolStatusSync());      
+    },
+    function(cb){
+      db.getGroups(function(g){cb(null,g);});
+    },
+    function(cb){
+      db.getGroupsStats(function(gs){cb(null,gs);});
+    },
+    function(cb){
+      db.getAllWorkers(function(w){cb(null,w);});
+    }
+  ],function(err,results){
+    poolstats = results[0];
+    groups = results[1];
+    groupstats = results[2];
+    workers = results[3][0];
+    workerstats = results[3][1];
+    last_update = new moment();
+    logger.info("Status updated");
+  });
+}
+
+
+function getGroupStats(group) {
+  var output = {};
+  output.uptime = seconds_to_str(poolstats[0].runtime);
+  if(group !== undefined) {
+    var workers_in_group = workerstats[group];
+    output.groups = 1;
+    output.workers = workers_in_group.length;
+    output.idle = 0;
+    var sum = u.reduce(workers_in_group,function(cur,item){
+      cur.hashrate1m = cur.hashrate1m+parseInt(item.hashrate1m);
+      cur.hashrate5m = cur.hashrate5m+parseInt(item.hashrate5m);
+      cur.hashrate1hr = cur.hashrate1hr+parseInt(item.hashrate1hr);
+      cur.hashrate1d = cur.hashrate1d+parseInt(item.hashrate1d);
+      return cur;
+    },{hashrate1m:0,hashrate5m:0,hashrate1hr:0,hashrate1d:0});
+    output.hashrate1m = sum.hashrate1m;
+    output.hashrate5m = sum.hashrate5m;
+    output.hashrate1hr = sum.hashrate1hr;
+    output.hashrate1d = sum.hashrate1d;
+  } else {
+    output.hashrate1m = poolstats[1].hashrate1m;
+    output.hashrate5m = poolstats[1].hashrate5m;
+    output.hashrate1hr = poolstats[1].hashrate1hr;
+    output.groups = poolstats[0].Users;
+    output.workers = poolstats[0].Workers;
+    output.idle = poolstats[0].Idle;
+  }
+  console.log(output);
+  return output;
+}
 
 app.get('/',function(req,res){
-  var groups = range('A','O').toArray();
-  var online;
-  var offline;
-  db.get_last_job(function(err,job){
-    db.get_controllers_by_job(job.job_id,function(err,controllers){
-      var count = u.countBy(controllers,function(x){return x.online;});
-      online = count['1'];
-      offline = count['0'];
-      async.each(controllers,
-		 function(controller,callback) {
-		   controller.group = groups[parseInt(controller.ip.split('.')[2])-1];
-		   controller.ip_value = ip_to_value(controller.ip);
-		   controller.uptime_str = seconds_to_str(controller.uptime);
-		   if(controller.online) {
-		     controller.online = controller.boards;
-		   } else {
-		     controller.online = -1;
-		   }
-		   callback();
-		 },
-		 function(err){
-		 });
-      job.hashrate = job.hashrate/1000;
-      job.expected = job.expected/1000;
-      job.online = online;
-      job.offline = offline;
-      job.avg = Math.floor(job.hashrate*1000/job.online)/1000;
-      cur_job = job;
-      cur_controllers = controllers;
-      res.render('index',{'job':[job],'controllers':controllers,'groups': groups.map(function(x){return {group:x};})});
-    });
-  });
+  res.render('index',{pool:[getGroupStats()],workers:u.flatten(u.values(workerstats)),groups:groups.map(function(x){return {group:x};})});
 });
 
 app.get('/stats',function(req,res){
-  res.json(cur_job);
+  res.json(getGroupStats());
 });
 
 app.get('/stats/:group',function(req,res){
-  var group = req.params.group;
-  var groups = range('A','O').toArray();
-  var ip_sec = groups.indexOf(group)+1;
-  if(ip_sec==0) {
-    res.json(cur_job);
-  } else {
-    var group_controllers = u.filter(cur_controllers,function(controller){
-      var ip = controller.ip;
-      return (ip.split('.')[2]==ip_sec);
-    });
-    var group_job = u.foldl(group_controllers,function(res,controller){
-      res.hashrate+=controller.hashrate;
-      res.expected+=controller.expected;
-      if(controller.online>=0) {
-	res.online+=1;
-      } else {
-	res.offline+=1;
-      }
-      return res;
-    },{hashrate:0,expected:0,online:0,offline:0});
-    group_job.hashrate = Math.floor(group_job.hashrate)/1000;
-    group_job.expected = Math.floor(group_job.expected)/1000;
-    group_job.avg = Math.floor(group_job.hashrate*1000/group_job.online)/1000;
-    group_job.eff = Math.floor(group_job.hashrate*10000/group_job.expected)/100;
-    res.json(group_job);
-  }
+  res.json(getGroupStats(req.params.group));
 });
 
-app.get('/reboot',function(req,res){
-  var who = req.query.who;
-  var clock = req.query.clock;
-  var ip1 = req.query.ip1;
-  var ip2 = req.query.ip2;
-  var opts = printf("%d %d %d %d",who,clock,ip1,ip2);
-  reboot(opts,function(err,resp){
-    if(err) {
-      res.send("Failed");
-    } else {
-      res.send("Done");
-    }
-  });
-});
-
-app.get('/flash',function(req,res){
-  var ip = req.query.ip;
-  var url = "http://"+ip+":8000/FlashMega/";
-  console.log(url);
-  download(url,function(data){
-    if(data) {
-      res.send("Done");
-    } else {
-      res.send("Failed");
-    }
-  });
-});
-
-
-app.get('/reclock',function(req,res){
-  var ip = req.query.ip;
-  var clock = req.query.clock;
-  var cur = req.query.cur;
-  var url,step;
-  if(cur == clock) return;
-  if(cur>clock){
-    url = "http://"+ip+":8000/Clk_Dn/";
-    step = (cur-clock)/10;
-  } else {
-    url = "http://"+ip+":8000/Clk_Up/";
-    step = (clock-cur)/10;
-  }
-  async.times(step, function(n,next){
-    download(url, function(page) {
-      next(null,page);
-    });
-  }, function(err, pages) {
-    res.send("Done");
-  });
-});
-
-app.get('/clockup',function(req,res){
-  var ip = req.query.ip;
-  var url = "http://"+ip+":8000/Clk_Up/";
-  download(url,function(page){
-    try{
-      var new_clk = page.match(/Clock:([\d]+)MHz/)[1];
-      res.send(new_clk);
-    } catch(e) {
-      res.send('250');
-    }
-  });
-});
-
-
-app.get('/clockdown',function(req,res){
-  var ip = req.query.ip;
-  var url = "http://"+ip+":8000/Clk_Dn/";
-  download(url,function(page){
-    try{
-      var new_clk = page.match(/Clock:([\d]+)MHz/)[1];
-      res.send(new_clk);
-    } catch(e) {
-      res.send('250');
-    }
-  });
-});
-
-
-app.get('/reboots',function(req,res){
-  db.get_latest_reboots(function(err,reboots){
-    async.each(reboots,function(reboot,callback){
-      reboot.reboot_time = moment(reboot.job_id).format('YYYY-M-D HH:mm:ss');
-      reboot.ip_value = ip_to_value(reboot.ip);
-      callback();
-    },function(err){
-      res.render('reboots',{'reboots':reboots});
-    });
-  });
-});
-
-app.get('/scan',function(req,res){
-  worker(function(){
-    res.redirect("/");
-  });
-});
-
-app.get('/groups',function(req,res){
-  var groups = range('A','O').toArray().map(function(x){return {G:x};});
-  res.render('groups',{groups:groups});
-});
-
-app.get('/groups/:g/:s',function(req,res){
-  var g = req.params.g;
-  var ip1 = g.charCodeAt()-'A'.charCodeAt()+1;
-  var s = req.params.s;
-  var r = range(1+12*(s-1),12*s);
-  var ips = r.toArray().map(function(x){return {ip1:ip1,ip2:x};});
-  res.render('group',{ips:ips,layout:false});
-});
-
-app.get('/grab/:ip',function(req,res){
-  var ip = req.params.ip;
-  var url = "http://"+ip+":8000/";
-  download(url,function(page){
-    res.send(page);
-  });
-});
-
+stats_loader();
+setInterval(stats_loader,60*1000);
+logger.info("Started backgroud loader");
 var server = app.listen(8000);
-console.log("Listening on Port 8000");
+logger.info("Listening on Port 8000");
 
-logger.info("Started worker process");
-// worker(function(){});
-setInterval(function(){worker(function(){});},500000);

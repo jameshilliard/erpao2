@@ -23,11 +23,11 @@
       "request" : "*",
       "underscore" : "*",
       "hogan-express" : "*",
-      "pq" : "*",
       "hogan.js" : "*",
       "moment" : "*",
       "winston" : "*",
       "printf" : "*",
-      "sprintf" : "*"
+      "sprintf" : "*",
+      "read-dir-files" : "*"
   }
 }

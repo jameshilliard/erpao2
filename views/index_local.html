@@ -116,13 +116,12 @@
        url = "/stats";
      } 
      $.getJSON(url,function(data){
-       $('#stats').find('tbody tr td:eq(0)').text(data.uptime);
-       $('#stats').find('tbody tr td:eq(1)').text(data.hashrate1m);
-       $('#stats').find('tbody tr td:eq(2)').text(data.hashrate5m);
-       $('#stats').find('tbody tr td:eq(3)').text(data.hashrate1hr);
-       $('#stats').find('tbody tr td:eq(4)').text(data.groups);
-       $('#stats').find('tbody tr td:eq(5)').text(data.workers);
-       $('#stats').find('tbody tr td:eq(6)').text(data.idle);
+       $('#stats').find('tbody tr td:eq(0)').text(data.hashrate);
+       $('#stats').find('tbody tr td:eq(1)').text(data.expected);
+       $('#stats').find('tbody tr td:eq(2)').text(data.eff);
+       $('#stats').find('tbody tr td:eq(3)').text(data.online);
+       $('#stats').find('tbody tr td:eq(4)').text(data.offline);
+       $('#stats').find('tbody tr td:eq(5)').text(data.avg);
      });
   }
 
@@ -158,29 +157,27 @@
 });
 </script>
 
-<!-- <a href="/scan" data-loading-text="刷新..." class="btn btn-primary btn-lg" role="button" onclick="$(this).button('loading')">立刻刷新</a> -->
+<a href="/scan" data-loading-text="刷新..." class="btn btn-primary btn-lg" role="button" onclick="$(this).button('loading')">立刻刷新</a>
 <div id="controllers" class="container">
   <table id="stats" class="table table-bordered table-striped">
     <thead>
       <tr>
-	<th>运行时间</th>
-	<th>算力(1 Min)</th>
-	<th>算力(5 Min)</th>
-	<th>算力(1 Hour)</th>
-	<th>分组</th>
-	<th>矿工</th>
-	<th>空闲</th>
+	<th>当前算力(TH/s)</th>
+	<th>理论算力(TH/s)</th>
+	<th>效率(%)</th>
+	<th>在线</th>
+	<th>离线</th>
+	<th>平均算力(TH/s)</th>
       </tr>
     </thead>
     <tbody>
       {{#pool}}
-      <td>{{uptime}}</td>
-      <td>{{hashrate1m}}</td>
-      <td>{{hashrate5m}}</td>
-      <td>{{hashrate1hr}}</td>
-      <td>{{groups}}</td>
-      <td>{{workers}}</td>
-      <td>{{idle}}</td>
+      <td>{{hashrate}}</td>
+      <td>{{expected}}</td>
+      <td>{{eff}}</td>
+      <td>{{online}}</td>
+      <td>{{offline}}</td>
+      <td>{{avg}}</td>
       {{/pool}}
     </tbody>
   </table>
@@ -204,12 +201,12 @@
         <th>算力(1 Min)</th>
         <th>算力(5 Min)</th>
         <th>算力(1 Hour)</th>
-	<!-- <th> -->
-	<!--   <button id="btn-g-flash" onclick="group_flash()" class="btn btn-small btn-danger">Flash</button> -->
-	<!--   <button id="btn-g-up" onclick="group_up()" class="btn btn-small btn-primary">UP</button> -->
-	<!--   <button id="btn-g-down" onclick="group_down()" class="btn btn-small btn-primary">DOWN</button> -->
-	<!--   <button id="btn-g-reset" onclick="group_reset()" class="btn btn-small btn-warning">重启</button> -->
-	<!-- </th> -->
+	<th>
+	  <button id="btn-g-flash" onclick="group_flash()" class="btn btn-small btn-danger">Flash</button>
+	  <button id="btn-g-up" onclick="group_up()" class="btn btn-small btn-primary">UP</button>
+	  <button id="btn-g-down" onclick="group_down()" class="btn btn-small btn-primary">DOWN</button>
+	  <button id="btn-g-reset" onclick="group_reset()" class="btn btn-small btn-warning">重启</button>
+	</th>
       </tr>
     </thead>
     <tbody class="searchable">
@@ -217,28 +214,28 @@
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
 	<td>{{group}}</td>
-	<td><a target="_blank" href="http://{{ip}}:8000/">{{worker}}</a></td>
+	<td data-value="{{ip_value}}"><a target="_blank" href="http://{{ip}}:8000/">{{worker}}</a></td>
 	<td>{{hashrate1m}}</td>
 	<td>{{hashrate5m}}</td>
 	<td>{{hashrate1hr}}</td>
-	<!-- <td> -->
-	<!--   <\!-- <button class="btn btn-small btn-info">详细</button> -\-> -->
-	<!--   <\!-- <button class="btn btn-small btn-primary">编辑</button> -\-> -->
-	<!--   <button onclick="flash(this)" data-loading-text="Flash..." class="btn btn-small btn-danger">Flash</button> -->
-	<!--   <button onclick="clockup(this)" data-loading-text="UP..." class="btn btn-small btn-primary">UP</button> -->
-	<!--   <button onclick="clockdown(this)" data-loading-text="DOWN..." class="btn btn-small btn-primary">DOWN</button> -->
-	<!--   <button onclick="reset(this)" data-loading-text="重启..." class="btn btn-small btn-warning">重启</button> -->
-	<!--   <select> -->
-	<!--     <option value="250" selected="selected">250</option> -->
-	<!--     <option value="270">270</option> -->
-	<!--     <option value="300">300</option> -->
-	<!--     <option value="320">320</option> -->
-	<!--   </select> -->
-	<!--   <select style="width:80px;"> -->
-	<!--     <option value="0">stratum-lb-usa48.btcguild.com</option> -->
-	<!--     <option value="1" selected="selected">us-stratum-vip.btcguild.com</option> -->
-	<!--   </select> -->
-	<!-- </td> -->
+	<td>
+	  <!-- <button class="btn btn-small btn-info">详细</button> -->
+	  <!-- <button class="btn btn-small btn-primary">编辑</button> -->
+	  <button onclick="flash(this)" data-loading-text="Flash..." class="btn btn-small btn-danger">Flash</button>
+	  <button onclick="clockup(this)" data-loading-text="UP..." class="btn btn-small btn-primary">UP</button>
+	  <button onclick="clockdown(this)" data-loading-text="DOWN..." class="btn btn-small btn-primary">DOWN</button>
+	  <button onclick="reset(this)" data-loading-text="重启..." class="btn btn-small btn-warning">重启</button>
+	  <select>
+	    <option value="250" selected="selected">250</option>
+	    <option value="270">270</option>
+	    <option value="300">300</option>
+	    <option value="320">320</option>
+	  </select>
+	  <select style="width:80px;">
+	    <option value="0">stratum-lb-usa48.btcguild.com</option>
+	    <option value="1" selected="selected">us-stratum-vip.btcguild.com</option>
+	  </select>
+	</td>
       </tr>
       {{/workers}}
     </tbody>
