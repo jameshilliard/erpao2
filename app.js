@@ -22,22 +22,6 @@ app.use(bodyParser.urlencoded(({ extended: true })));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
-function ip_to_value(ip) {
-  var chunks = ip.split('.');
-  return parseInt(chunks[2])*1000+parseInt(chunks[3]);
-}
-
-
-function seconds_to_str(sec){
-  var d = sec/86400;
-  sec = sec%86400;
-  var h = sec/3600;
-  sec = sec%3600;
-  var m = sec/60;
-  sec = sec%60;
-  return printf("%02dd:%02dh:%02dm:%02ds",d,h,m,sec);
-}
-
 var poolstats;
 var workers;
 var workerstats;
@@ -73,23 +57,23 @@ function stats_loader() {
 
 function getGroupStats(group) {
   var output = {};
-  output.uptime = seconds_to_str(poolstats[0].runtime);
+  output.uptime = helpers.seconds_to_str(poolstats[0].runtime);
   if(group !== undefined) {
     var workers_in_group = workerstats[group];
     output.groups = 1;
     output.workers = workers_in_group.length;
     output.idle = 0;
     var sum = u.reduce(workers_in_group,function(cur,item){
-      cur.hashrate1m = cur.hashrate1m+parseInt(item.hashrate1m);
-      cur.hashrate5m = cur.hashrate5m+parseInt(item.hashrate5m);
-      cur.hashrate1hr = cur.hashrate1hr+parseInt(item.hashrate1hr);
-      cur.hashrate1d = cur.hashrate1d+parseInt(item.hashrate1d);
+      cur.hashrate1m = cur.hashrate1m+helpers.unsuffix_string(item.hashrate1m);
+      cur.hashrate5m = cur.hashrate5m+helpers.unsuffix_string(item.hashrate5m);
+      cur.hashrate1hr = cur.hashrate1hr+helpers.unsuffix_string(item.hashrate1hr);
+      cur.hashrate1d = cur.hashrate1d+helpers.unsuffix_string(item.hashrate1d);
       return cur;
     },{hashrate1m:0,hashrate5m:0,hashrate1hr:0,hashrate1d:0});
-    output.hashrate1m = sum.hashrate1m;
-    output.hashrate5m = sum.hashrate5m;
-    output.hashrate1hr = sum.hashrate1hr;
-    output.hashrate1d = sum.hashrate1d;
+    output.hashrate1m = helpers.suffix_string(sum.hashrate1m);
+    output.hashrate5m = helpers.suffix_string(sum.hashrate5m);
+    output.hashrate1hr = helpers.suffix_string(sum.hashrate1hr);
+    output.hashrate1d = helpers.suffix_string(sum.hashrate1d);
   } else {
     output.hashrate1m = poolstats[1].hashrate1m;
     output.hashrate5m = poolstats[1].hashrate5m;
