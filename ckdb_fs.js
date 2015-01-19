@@ -23,7 +23,7 @@ function getPoolStatusSync() {
 function getGroups(callback) {
   load_dir.list(userDir,
 		function(err,res) {
-		  if(err) callback(null);
+		  if(err) callback([]);
 		  else callback(res.slice(1).map(path.basename));
 		});
 }
@@ -31,7 +31,7 @@ function getGroups(callback) {
 function getGroupStats(callback) {
   load_dir.read(userDir,
 		function(err,res){
-		  if(err) callback(null);
+		  if(err) callback([]);
 		  else {
 		    var group_buffer = _.pairs(res);
 		    callback(group_buffer.map(function(elem){return [elem[0],elem[1].toString().trim()];}));
@@ -42,7 +42,7 @@ function getGroupStats(callback) {
 function getAllWorkers(callback) {
   load_dir.read(workerDir,
 		function(err,res) {
-		  if(err) callback(null);
+		  if(err) callback([]);
 		  else {
 		    var workers = _.keys(res).sort();
 		    var grouped_workers = 
