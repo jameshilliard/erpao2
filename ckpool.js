@@ -25,15 +25,15 @@ function send_msg(socket,msg,callback) {
   });
 }
 
-// generator
+// generator(handle incoming connect)
 exports.getdiff = function(cb) { send_msg(generator,"getdiff",cb);};
 exports.getnotify = function(cb) { send_msg(generator,"getnotify",cb);};
 // listener(main process)
 exports.shutdown = function(cb) { send_msg(listener,"shutdown",cb);};
 exports.restart = function(cb) { send_msg(listener,"restart",cb);};
 exports.ping = function(cb) { send_msg(listener,"ping",cb);};
-// connector
+// connector(connect to upstream pool)
 
-// stratifier
+// stratifier(handle all stratum stuff)
 
 
