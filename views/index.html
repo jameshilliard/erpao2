@@ -116,20 +116,21 @@
        url = "/stats";
      } 
      $.getJSON(url,function(data){
-       $('#stats').find('tbody tr td:eq(0)').text(data.uptime);
-       $('#stats').find('tbody tr td:eq(1)').text(data.hashrate1m);
-       $('#stats').find('tbody tr td:eq(2)').text(data.hashrate5m);
-       $('#stats').find('tbody tr td:eq(3)').text(data.hashrate1hr);
-       $('#stats').find('tbody tr td:eq(4)').text(data.groups);
-       $('#stats').find('tbody tr td:eq(5)').text(data.workers);
-       $('#stats').find('tbody tr td:eq(6)').text(data.idle);
+       $('#stats').find('tbody tr td:eq(0)').text(data.upstream);
+       $('#stats').find('tbody tr td:eq(1)').text(data.uptime);
+       $('#stats').find('tbody tr td:eq(2)').text(data.hashrate1m);
+       $('#stats').find('tbody tr td:eq(3)').text(data.hashrate5m);
+       $('#stats').find('tbody tr td:eq(4)').text(data.hashrate1hr);
+       $('#stats').find('tbody tr td:eq(5)').text(data.groups);
+       $('#stats').find('tbody tr td:eq(6)').text(data.workers);
+       $('#stats').find('tbody tr td:eq(7)').text(data.idle);
      });
   }
 
   function mark_red(){
      $('.searchable tr').filter(function(){
-         return $(this).find('td:eq(3)').text() == '-1';
-     }).each(function(){$(this).find('td:eq(3)').addClass('highlight')});
+         return $(this).find('td:last').text() == 'true';
+     }).each(function(){$(this).find('td:eq(2)').addClass('highlight')});
   }
 
   $(document).ready(function () {
@@ -163,6 +164,7 @@
   <table id="stats" class="table table-bordered table-striped">
     <thead>
       <tr>
+	<th>当前矿池</th>
 	<th>运行时间</th>
 	<th>算力(1 Min)</th>
 	<th>算力(5 Min)</th>
@@ -174,6 +176,7 @@
     </thead>
     <tbody>
       {{#pool}}
+      <td>{{upstream}}</td>
       <td>{{uptime}}</td>
       <td>{{hashrate1m}}</td>
       <td>{{hashrate5m}}</td>
@@ -204,6 +207,7 @@
         <th>算力(1 Min)</th>
         <th>算力(5 Min)</th>
         <th>算力(1 Hour)</th>
+	<th>空闲</th>
 	<!-- <th> -->
 	<!--   <button id="btn-g-flash" onclick="group_flash()" class="btn btn-small btn-danger">Flash</button> -->
 	<!--   <button id="btn-g-up" onclick="group_up()" class="btn btn-small btn-primary">UP</button> -->
@@ -217,10 +221,11 @@
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
 	<td>{{group}}</td>
-	<td><a target="_blank" href="http://{{ip}}:8000/">{{worker}}</a></td>
+	<td>{{worker}}</td>
 	<td>{{hashrate1m}}</td>
 	<td>{{hashrate5m}}</td>
 	<td>{{hashrate1hr}}</td>
+	<td>{{idle}}</td>
 	<!-- <td> -->
 	<!--   <\!-- <button class="btn btn-small btn-info">详细</button> -\-> -->
 	<!--   <\!-- <button class="btn btn-small btn-primary">编辑</button> -\-> -->

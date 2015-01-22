@@ -28,6 +28,7 @@ function send_msg(socket,msg,callback) {
 // generator(handle incoming connect)
 exports.getdiff = function(cb) { send_msg(generator,"getdiff",cb);};
 exports.getnotify = function(cb) { send_msg(generator,"getnotify",cb);};
+exports.reconnect = function(cb) { send_msg(generator,"reconnect",cb);};
 // listener(main process)
 exports.shutdown = function(cb) { send_msg(listener,"shutdown",cb);};
 exports.restart = function(cb) { send_msg(listener,"restart",cb);};

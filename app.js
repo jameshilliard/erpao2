@@ -57,6 +57,7 @@ function stats_loader() {
 
 function getGroupStats(group) {
   var output = {};
+  output.upstream = poolstats[0].upstream;
   output.uptime = helpers.seconds_to_str(poolstats[0].runtime);
   if(group !== undefined) {
     var workers_in_group = workerstats[group];
