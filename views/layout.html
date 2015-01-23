@@ -14,6 +14,7 @@
     <!-- Custom styles for this template -->
     <link href="css/sticky-footer-navbar.css" rel="stylesheet">
     <link href="css/bootstrap-sortable.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/bootstrap-sortable.js"></script>
@@ -35,14 +36,14 @@
           <div class="nav-collapse collapse">
             <ul id="menu" class="nav navbar-nav">
               <li id="menu-hashrate"><a href="/">矿机总览</a></li>
-              <li id="menu-groups"><a href="/groups">分组管理</a></li>
+              <li id="menu-admin"><a href="/admin">Admin</a></li>
               <li id="menu-reboots"><a href="/reboots">重启日志</a></li>
             </ul>
           </div><!--/.nav-collapse -->
 	  <script>
 	    var path = window.location.pathname.slice(1);
 	    if(path=="") $("#menu-hashrate").addClass("active");
-	    if(path=="groups") $("#menu-groups").addClass("active");
+	    if(path=="admin") $("#menu-admin").addClass("active");
 	    if(path=="reboots") $("#menu-reboots").addClass("active");
 	  </script>
 
