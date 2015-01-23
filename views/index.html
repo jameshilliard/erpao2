@@ -208,6 +208,7 @@
         <th>算力(5 Min)</th>
         <th>算力(1 Hour)</th>
 	<th>空闲</th>
+	<th>最近提交</th>
 	<!-- <th> -->
 	<!--   <button id="btn-g-flash" onclick="group_flash()" class="btn btn-small btn-danger">Flash</button> -->
 	<!--   <button id="btn-g-up" onclick="group_up()" class="btn btn-small btn-primary">UP</button> -->
@@ -222,10 +223,12 @@
 	<td><input type="checkbox" class="selector"></input></td>
 	<td>{{group}}</td>
 	<td>{{worker}}</td>
-	<td>{{hashrate1m}}</td>
-	<td>{{hashrate5m}}</td>
-	<td>{{hashrate1hr}}</td>
+	<td data-value={{hashrate1m_val}}>{{hashrate1m}}</td>
+	<td data-value={{hashrate5m_val}}>{{hashrate5m}}</td>
+	<td data-value={{hashrate1hr_val}}>{{hashrate1hr}}</td>
 	<td>{{idle}}</td>
+	<td>{{lastshare}}</td>
+
 	<!-- <td> -->
 	<!--   <\!-- <button class="btn btn-small btn-info">详细</button> -\-> -->
 	<!--   <\!-- <button class="btn btn-small btn-primary">编辑</button> -\-> -->

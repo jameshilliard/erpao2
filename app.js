@@ -63,18 +63,19 @@ function getGroupStats(group) {
     var workers_in_group = workerstats[group];
     output.groups = 1;
     output.workers = workers_in_group.length;
-    output.idle = 0;
     var sum = u.reduce(workers_in_group,function(cur,item){
       cur.hashrate1m = cur.hashrate1m+helpers.unsuffix_string(item.hashrate1m);
       cur.hashrate5m = cur.hashrate5m+helpers.unsuffix_string(item.hashrate5m);
       cur.hashrate1hr = cur.hashrate1hr+helpers.unsuffix_string(item.hashrate1hr);
       cur.hashrate1d = cur.hashrate1d+helpers.unsuffix_string(item.hashrate1d);
+      cur.idle = cur.idle+item.idle;
       return cur;
-    },{hashrate1m:0,hashrate5m:0,hashrate1hr:0,hashrate1d:0});
+    },{hashrate1m:0,hashrate5m:0,hashrate1hr:0,hashrate1d:0,idle:0});
     output.hashrate1m = helpers.suffix_string(sum.hashrate1m);
     output.hashrate5m = helpers.suffix_string(sum.hashrate5m);
     output.hashrate1hr = helpers.suffix_string(sum.hashrate1hr);
     output.hashrate1d = helpers.suffix_string(sum.hashrate1d);
+    output.idle = sum.idle;
   } else {
     output.hashrate1m = poolstats[1].hashrate1m;
     output.hashrate5m = poolstats[1].hashrate5m;
@@ -83,12 +84,22 @@ function getGroupStats(group) {
     output.workers = poolstats[0].Workers;
     output.idle = poolstats[0].Idle;
   }
-  console.log(output);
+  logger.debug(output);
   return output;
 }
 
 app.get('/',function(req,res){
-  res.render('index',{pool:[getGroupStats()],workers:u.flatten(u.values(workerstats)),groups:groups.map(function(x){return {group:x};})});
+  var render_pool = [getGroupStats()];
+  var render_workers = u.flatten(u.values(workerstats));
+  render_workers.map(function(x){x.lastshare=helpers.seconds_to_str(x.lastshare);});
+  render_workers.map(function(x){
+    x.hashrate1m_val = helpers.unsuffix_string(x.hashrate1m);
+    x.hashrate5m_val = helpers.unsuffix_string(x.hashrate5m);
+    x.hashrate1hr_val = helpers.unsuffix_string(x.hashrate1hr);
+    x.hashrate1d_val = helpers.unsuffix_string(x.hashrate1d);
+  });
+  var render_groups = groups.map(function(x){return {group:x};});
+  res.render('index',{pool:render_pool, workers:render_workers, groups:render_groups});
 });
 
 app.get('/stats',function(req,res){
@@ -99,8 +110,12 @@ app.get('/stats/:group',function(req,res){
   res.json(getGroupStats(req.params.group));
 });
 
+app.get('/admin',function(req,res){
+  res.render('admin');
+});
+
 stats_loader();
-setInterval(stats_loader,60*1000);
+setInterval(stats_loader,20*1000);
 logger.info("Started backgroud loader");
 var server = app.listen(8000);
 logger.info("Listening on Port 8000");
