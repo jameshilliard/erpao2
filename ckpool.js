@@ -6,6 +6,12 @@ var connector = socket_dir + "connector";
 var listener = socket_dir + "listener";
 var stratifier = socket_dir + "stratifier";
 
+function load_conf() {
+  var config = require('./config.json');
+  var ck_conf = require(config.ckdb_dir+'ckproxy.conf');
+}
+
+
 function send_msg(socket,msg,callback) {
   var msg_len = msg.length;
   var buf = new Buffer(4);

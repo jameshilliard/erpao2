@@ -1,0 +1,20 @@
+<div class="container" style="">
+  <div class="btn-group">
+    <button type="button" class="btn  btn-primary dropdown-toggle" 
+	    data-toggle="dropdown">
+      Switch Pool <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      {{#pool}}
+      <li><a href="/pool/{{index}}">{{url}}</a></li>
+      {{/pool}}
+    </ul>
+  </div>
+
+
+  <a href="#" class="btn btn-primary "><i class="fa fa-play"></i> Start</a>
+  <a href="#" class="btn btn-info "><i class="fa fa-refresh"></i> Restart</a>
+  <a href="#" class="btn btn-danger "><i class="fa fa-stop"></i> Stop</a>
+
+
+</div>

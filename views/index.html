@@ -129,7 +129,7 @@
 
   function mark_red(){
      $('.searchable tr').filter(function(){
-         return $(this).find('td:last').text() == 'true';
+         return $(this).find('td:eq(6)').text() == 'true';
      }).each(function(){$(this).find('td:eq(2)').addClass('highlight')});
   }
 

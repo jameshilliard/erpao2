@@ -89,9 +89,10 @@ function getGroupStats(group) {
 }
 
 app.get('/',function(req,res){
+  var now = moment();
   var render_pool = [getGroupStats()];
   var render_workers = u.flatten(u.values(workerstats));
-  render_workers.map(function(x){x.lastshare=helpers.seconds_to_str(x.lastshare);});
+  render_workers.map(function(x){x.lastshare=helpers.seconds_to_str(now - x.lastshare*1000);});
   render_workers.map(function(x){
     x.hashrate1m_val = helpers.unsuffix_string(x.hashrate1m);
     x.hashrate5m_val = helpers.unsuffix_string(x.hashrate5m);
