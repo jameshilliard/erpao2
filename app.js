@@ -68,7 +68,7 @@ function getGroupStats(group) {
       cur.hashrate5m = cur.hashrate5m+helpers.unsuffix_string(item.hashrate5m);
       cur.hashrate1hr = cur.hashrate1hr+helpers.unsuffix_string(item.hashrate1hr);
       cur.hashrate1d = cur.hashrate1d+helpers.unsuffix_string(item.hashrate1d);
-      cur.idle = cur.idle+item.idle;
+      cur.idle = cur.idle+((item.idle=="true")?1:0);
       return cur;
     },{hashrate1m:0,hashrate5m:0,hashrate1hr:0,hashrate1d:0,idle:0});
     output.hashrate1m = helpers.suffix_string(sum.hashrate1m);
@@ -109,6 +109,10 @@ app.get('/stats',function(req,res){
 
 app.get('/stats/:group',function(req,res){
   res.json(getGroupStats(req.params.group));
+});
+
+app.get('/charts',function(req,res){
+  res.render('charts');
 });
 
 app.get('/admin',function(req,res){

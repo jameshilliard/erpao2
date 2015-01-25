@@ -28,6 +28,7 @@
       "winston" : "*",
       "printf" : "*",
       "sprintf" : "*",
-      "read-dir-files" : "*"
+      "read-dir-files" : "*",
+      "influx" : "*"
   }
 }

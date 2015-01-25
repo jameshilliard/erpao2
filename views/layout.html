@@ -36,15 +36,15 @@
           <div class="nav-collapse collapse">
             <ul id="menu" class="nav navbar-nav">
               <li id="menu-hashrate"><a href="/">矿机总览</a></li>
+              <li id="menu-charts"><a href="/charts">Charts</a></li>
               <li id="menu-admin"><a href="/admin">Admin</a></li>
-              <li id="menu-reboots"><a href="/reboots">重启日志</a></li>
             </ul>
           </div><!--/.nav-collapse -->
 	  <script>
 	    var path = window.location.pathname.slice(1);
 	    if(path=="") $("#menu-hashrate").addClass("active");
+	    if(path=="charts") $("#menu-charts").addClass("active");
 	    if(path=="admin") $("#menu-admin").addClass("active");
-	    if(path=="reboots") $("#menu-reboots").addClass("active");
 	  </script>
 
         </div>
