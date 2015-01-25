@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var logger = require('./logger');
 var db = require('./ckdb_fs');
+var influxdb = require('./influx');
 var async = require('async');
 var u = require('underscore');
 var printf = require('printf');
@@ -29,6 +30,22 @@ var groups;
 var groupstats;
 var last_update = new moment();
 
+function save_worker_stats() {
+  var workers = u.flatten(u.values(workerstats));
+  console.log(workers);
+  logger.info("Start saving stat...");
+  var now = new Date();
+  async.eachLimit(workers,20,function(worker,callback){
+    influxdb.save_worker(worker.worker,helpers.unsuffix_string(worker.hashrate1m),now,callback);
+  },function(err){
+    if(err) {
+      logger.debug(err);
+    } else {
+      logger.info("Finished saving stats...");
+    }
+  });
+}
+
 function stats_loader() {
   async.series([
     function(cb){
@@ -49,6 +66,7 @@ function stats_loader() {
     groupstats = results[2];
     workers = results[3][0];
     workerstats = results[3][1];
+    save_worker_stats();
     last_update = new moment();
     logger.info("Status updated");
   });
