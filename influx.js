@@ -1,7 +1,6 @@
 var influx = require('influx');
 var logger = require('./logger');
 var async = require('async');
-var sqlstrings = require('./sqlstrings');
 var sprintf = require('sprintf');
 var helpers = require('./helpers');
 var _ = require('underscore');
