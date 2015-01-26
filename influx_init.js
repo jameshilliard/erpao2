@@ -22,6 +22,16 @@ function init_db(){
 	  });
 	});
       }
+      if(dbs.indexOf('pool_db') === -1) {
+	logger.info("Creating database pool_db");
+	dbserver.createDatabase('pool_db', function(err) {
+	  if(err) throw err;
+	  logger.info('Creating User');
+	  dbserver.createUser('pool_db', 'erpao', 'laitayipao', function(err) {
+            if(err) throw err;
+	  });
+	});
+      }
     }
   });
 }

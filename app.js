@@ -33,8 +33,7 @@ var clean = true;
 
 function save_worker_stats() {
   var workers = u.flatten(u.values(workerstats));
-  console.log(workers);
-  logger.info("Start saving stat...");
+  logger.info("Start saving worker stat...");
   var now = new Date();
   async.eachLimit(workers,20,function(worker,callback){
     influxdb.save_worker(worker.worker,helpers.unsuffix_string(worker.hashrate1m),now,callback);
@@ -42,7 +41,22 @@ function save_worker_stats() {
     if(err) {
       logger.debug(err);
     } else {
-      logger.info("Finished saving stats...");
+      logger.info("Finished saving worker stats...");
+    }
+  });
+}
+
+function save_pool_stats() {
+  logger.info("Start saving pool stats...");
+  var stats = {};
+  var now = new Date();
+  u.extend(stats,poolstats[0]);
+  u.extend(stats,poolstats[1]);
+  influxdb.save_pool(stats,now,function(err){
+    if(err) {
+      logger.debug(err);
+    } else {
+      logger.info("Finished saving pool stats...");
     }
   });
 }
@@ -67,6 +81,7 @@ function stats_loader() {
     groupstats = results[2];
     workers = results[3][0];
     workerstats = results[3][1];
+    save_pool_stats();
     save_worker_stats();
     last_update = new moment();
     logger.info("Status updated");
@@ -137,7 +152,9 @@ app.get('/stats/:group',function(req,res){
 });
 
 app.get('/charts',function(req,res){
-  res.render('charts');
+  influxdb.get_worker('amstress.1173dev',function(data) {
+    res.render('charts',{ worker:'amstress.1173dev', series: JSON.stringify(data)});
+  });
 });
 
 app.get('/admin',function(req,res){

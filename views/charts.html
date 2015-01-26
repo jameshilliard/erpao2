@@ -1,31 +1,40 @@
 <script src="/js/highcharts.js"></script>
 
-<div id="container" style="width:50%; height:50%;"></div>
+<div id="container"></div>
 
 <script>
-$(function () { 
-    $('#container').highcharts({
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: 'Fruit Consumption'
-        },
-        xAxis: {
-            categories: ['Apples', 'Bananas', 'Oranges']
-        },
-        yAxis: {
-            title: {
-                text: 'Fruit eaten'
-            }
-        },
-        series: [{
-            name: 'Jane',
-            data: [1, 0, 4]
-        }, {
-            name: 'John',
-            data: [5, 7, 3]
-        }]
-    });
-});
+  $(function () { 
+  $('#container').highcharts({
+  credits: {
+      enabled: false
+  },
+  chart: {
+  type: 'spline'
+  },
+  title: {
+  text: '{{worker}} Hashrate'
+  },
+  xAxis: {
+  type: 'datetime',
+  dateTimeLabelFormats: { 
+  month: '%b. %e',
+  year: '%y'
+  },
+  title: {
+  text: 'Date'
+  }
+  },
+  yAxis: {
+  title: {
+  text: 'Hashrate (TH/s)'
+  },
+  min: 0
+  },
+  tooltip: {
+  headerFormat: '<b>{series.name}</b><br>',
+  pointFormat: '{point.x: %b. %e, %H:%M:%S}: {point.y:.2f} TH/s',
+  crosshairs: [true]
+  },
+  series: [ { name: '{{worker}}', data:{{series}} }]
+  })});
 </script>
