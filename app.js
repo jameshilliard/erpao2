@@ -29,6 +29,7 @@ var workerstats;
 var groups;
 var groupstats;
 var last_update = new moment();
+var clean = true;
 
 function save_worker_stats() {
   var workers = u.flatten(u.values(workerstats));
@@ -69,6 +70,7 @@ function stats_loader() {
     save_worker_stats();
     last_update = new moment();
     logger.info("Status updated");
+    clean = false;
   });
 }
 
@@ -110,13 +112,18 @@ app.get('/',function(req,res){
   var now = moment();
   var render_pool = [getGroupStats()];
   var render_workers = u.flatten(u.values(workerstats));
-  render_workers.map(function(x){x.lastshare=helpers.seconds_to_str(now - x.lastshare*1000);});
-  render_workers.map(function(x){
-    x.hashrate1m_val = helpers.unsuffix_string(x.hashrate1m);
-    x.hashrate5m_val = helpers.unsuffix_string(x.hashrate5m);
-    x.hashrate1hr_val = helpers.unsuffix_string(x.hashrate1hr);
-    x.hashrate1d_val = helpers.unsuffix_string(x.hashrate1d);
-  });
+  if(!clean) {
+    render_workers.map(function(x){if(x.lastshare) x.lastshare=helpers.seconds_to_str(now/1000 - x.lastshare);
+				 else x.lastshare = "N/A";
+				});
+    render_workers.map(function(x){
+      x.hashrate1m_val = helpers.unsuffix_string(x.hashrate1m);
+      x.hashrate5m_val = helpers.unsuffix_string(x.hashrate5m);
+      x.hashrate1hr_val = helpers.unsuffix_string(x.hashrate1hr);
+      x.hashrate1d_val = helpers.unsuffix_string(x.hashrate1d);
+    });
+    clean = true;
+  }
   var render_groups = groups.map(function(x){return {group:x};});
   res.render('index',{pool:render_pool, workers:render_workers, groups:render_groups});
 });
