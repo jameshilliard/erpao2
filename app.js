@@ -151,9 +151,20 @@ app.get('/stats/:group',function(req,res){
   res.json(getGroupStats(req.params.group));
 });
 
-app.get('/charts',function(req,res){
-  influxdb.get_worker('amstress.1173dev',function(data) {
-    res.render('charts',{ worker:'amstress.1173dev', series: JSON.stringify(data)});
+app.get('/charts', function(req,res){
+  influxdb.get_pool(function(data){
+    res.render('charts_pool', { data_hashrate: JSON.stringify(data[0]),
+				data_users: JSON.stringify(data[1]),
+				data_workers: JSON.stringify(data[2]),
+				data_idles: JSON.stringify(data[3])
+			      });
+  });
+});
+
+app.get('/charts/:worker',function(req,res){
+  var worker = req.params.worker;
+  influxdb.get_worker(worker,function(data) {
+    res.render('charts',{ worker: worker, series: JSON.stringify(data)});
   });
 });
 

@@ -1,0 +1,65 @@
+<script src="/js/highcharts.js"></script>
+
+<div id="container"></div>
+
+<script>
+$(function () {
+    $('#container').highcharts({
+credits: {
+    enabled: false
+},
+chart: {
+    type: 'spline'
+},
+title: {
+    text: 'Pool Stats'
+},
+xAxis: {
+    type: 'datetime',
+    dateTimeLabelFormats: {
+month: '%b. %e',
+year: '%y'
+    },
+    title: {
+text: 'Date'
+    }
+},
+yAxis: [
+    {
+    title: {
+      text: 'Hashrate (TH/s)'
+           },
+    min: 0,
+    tooltip: {
+      headerFormat: '<b>{series.name}</b><br>',
+      pointFormat: '{point.x: %b. %e, %H:%M:%S}: {point.y:.2f} TH/s',
+      crosshairs: [true]
+             }
+    },
+    {
+    title: {
+      text: 'Users'
+            },
+    min: 0
+    },  
+    {
+    title: {
+      text: 'Workers'
+            },
+    min: 0
+    },  
+    {
+    title: {
+      text: 'Idle'
+            },
+    min: 0
+    }
+],
+series: [ { yaxis: 0, name: 'Hashrate', data: {{data_hashrate}} },
+          { yaxis: 1, name: 'Users', data: {{data_users}} },
+          { yaxis: 2, name: 'Workers', data: {{data_workers}} },
+          { yaxis: 3, name: 'Idle', data: {{data_idles}} }
+        ]
+    });
+});
+</script>

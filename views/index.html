@@ -13,7 +13,7 @@
 
 <!-- <div id="hashrate" style="height: 500px; min-width: 500px"></div> -->
 <style>
-.table-striped tbody tr td.highlight { background-color: #cc425d; }
+.table-striped tbody tr td.highlight { background-color: darkgray; }
 </style>
 
 <script>
@@ -222,7 +222,7 @@
       <tr>
 	<td><input type="checkbox" class="selector"></input></td>
 	<td>{{group}}</td>
-	<td>{{worker}}</td>
+	<td><a href="/charts/{{worker}}">{{worker}}</a></td>
 	<td data-value={{hashrate1m_val}}>{{hashrate1m}}</td>
 	<td data-value={{hashrate5m_val}}>{{hashrate5m}}</td>
 	<td data-value={{hashrate1hr_val}}>{{hashrate1hr}}</td>
